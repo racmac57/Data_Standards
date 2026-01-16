@@ -75,38 +75,41 @@ C:\Users\carucci_r\OneDrive - City of Hackensack\09_Reference\Standards\
 
 ---
 
-## Unified Data Dictionary Locations (Copies)
+## Unified Data Dictionary Locations (Pointer Files)
 
 **Directory**: `unified_data_dictionary/`
+
+> **Note (2026-01-15)**: Following repository restructuring, duplicate files in unified_data_dictionary
+> have been replaced with pointer files that reference the canonical locations.
 
 ### Mappings Directory
 **Path**: `unified_data_dictionary/mappings/`
 
-- **`cad_to_rms_field_map_v2_enhanced.json`**
-  - Copy of enhanced CAD-to-RMS mapping schema (v2.0)
+- **`cad_to_rms_field_map_v2_enhanced.md`** (POINTER)
+  - Points to canonical: `CAD_RMS/DataDictionary/current/schema/cad_to_rms_field_map.json`
 
-- **`rms_to_cad_field_map_v2_enhanced.json`**
-  - Copy of enhanced RMS-to-CAD mapping schema (v2.0)
+- **`rms_to_cad_field_map_v2_enhanced.md`** (POINTER)
+  - Points to canonical: `CAD_RMS/DataDictionary/current/schema/rms_to_cad_field_map.json`
 
-- **`multi_column_matching_strategy.md`**
-  - Copy of multi-column matching strategy guide
+- **`multi_column_matching_strategy_POINTER.md`** (POINTER)
+  - Points to canonical: `CAD_RMS/DataDictionary/current/schema/multi_column_matching_strategy.md`
 
 ### Documentation Directory
 **Path**: `unified_data_dictionary/docs/`
 
-- **`rms_export_field_definitions.md`**
-  - Copy of RMS field definitions document
+- **`rms_export_field_definitions_POINTER.md`** (POINTER)
+  - Points to canonical: `RMS/DataDictionary/current/schema/rms_export_field_definitions.md`
 
 ---
 
 ## File Summary Table
 
-| File | Primary Location | Unified Data Dictionary Copy | Purpose |
-|------|-----------------|------------------------------|---------|
-| `cad_to_rms_field_map.json` (v2.0) | `CAD_RMS/DataDictionary/current/schema/` | `unified_data_dictionary/mappings/cad_to_rms_field_map_v2_enhanced.json` | Enhanced CAD-to-RMS mapping schema |
-| `rms_to_cad_field_map.json` (v2.0) | `CAD_RMS/DataDictionary/current/schema/` | `unified_data_dictionary/mappings/rms_to_cad_field_map_v2_enhanced.json` | Enhanced RMS-to-CAD mapping schema |
-| `multi_column_matching_strategy.md` | `CAD_RMS/DataDictionary/current/schema/` | `unified_data_dictionary/mappings/multi_column_matching_strategy.md` | Multi-column matching guide |
-| `rms_export_field_definitions.md` | `RMS/DataDictionary/current/schema/` | `unified_data_dictionary/docs/rms_export_field_definitions.md` | RMS field definitions |
+| File | Canonical Location | Pointer in unified_data_dictionary | Purpose |
+|------|-------------------|-----------------------------------|---------|
+| `cad_to_rms_field_map.json` (v2.0) | `CAD_RMS/DataDictionary/current/schema/` | `mappings/cad_to_rms_field_map_v2_enhanced.md` | Enhanced CAD-to-RMS mapping schema |
+| `rms_to_cad_field_map.json` (v2.0) | `CAD_RMS/DataDictionary/current/schema/` | `mappings/rms_to_cad_field_map_v2_enhanced.md` | Enhanced RMS-to-CAD mapping schema |
+| `multi_column_matching_strategy.md` | `CAD_RMS/DataDictionary/current/schema/` | `mappings/multi_column_matching_strategy_POINTER.md` | Multi-column matching guide |
+| `rms_export_field_definitions.md` | `RMS/DataDictionary/current/schema/` | `docs/rms_export_field_definitions_POINTER.md` | RMS field definitions |
 | `cad_to_rms_field_map.json` (v1.0) | `CAD/DataDictionary/current/schema/` | N/A | Legacy schema (backward compatibility) |
 | `rms_to_cad_field_map.json` (v1.0) | `CAD/DataDictionary/current/schema/` | N/A | Legacy schema (backward compatibility) |
 | `SCHEMA_ENHANCEMENT_SUMMARY.md` | `CAD_RMS/DataDictionary/` | N/A | Enhancement summary |
@@ -156,7 +159,8 @@ The legacy v1.0 schemas in `CAD/DataDictionary/current/schema/` remain available
 - All files use consistent naming conventions
 - Version numbers are included in schema files (v1.0 vs v2.0)
 - Legacy schemas are maintained for backward compatibility
-- Enhanced schemas are copied to unified_data_dictionary for centralized access
+- **Canonical locations** are established in CAD_RMS/ and RMS/ DataDictionary folders
+- **Pointer files** in unified_data_dictionary reference canonical locations (no duplicates)
 - All JSON files are valid and lint-free
 
 ---
@@ -169,3 +173,4 @@ The legacy v1.0 schemas in `CAD/DataDictionary/current/schema/` remain available
 | 2025-12-30 | Enhanced schemas (v2.0) created with multi-column matching |
 | 2025-12-30 | RMS field definitions document created |
 | 2025-12-30 | Files copied to unified_data_dictionary directory |
+| 2026-01-15 | Repository restructuring: duplicates replaced with pointer files |
