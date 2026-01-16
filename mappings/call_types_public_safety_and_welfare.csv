@@ -1,0 +1,49 @@
+Call_Type,Category,Response Type
+Alarm - Other,Public Safety and Welfare,Urgent
+Animal Bite Incident,Public Safety and Welfare,Urgent
+Boating Incident,Public Safety and Welfare,Urgent
+Child Custody Dispute,Public Safety and Welfare,Urgent
+Code Blue,Public Safety and Welfare,Routine
+Constable - Secured Park Facilities,Public Safety and Welfare,Routine
+Dead Animal,Public Safety and Welfare,Routine
+Dispute,Public Safety and Welfare,Urgent
+Disturbance,Public Safety and Welfare,Urgent
+Duty to Warn - Notification,Public Safety and Welfare,Routine
+Hazard All Other,Public Safety and Welfare,Urgent
+Hazardous Condition - Health / Welfare,Public Safety and Welfare,Urgent
+Hazardous Condition - Sewer Call,Public Safety and Welfare,Urgent
+Injured On Duty,Public Safety and Welfare,Urgent
+Insecure Building,Public Safety and Welfare,Urgent
+Intoxicated Person,Public Safety and Welfare,Routine
+Landlord / Tenant Dispute,Public Safety and Welfare,Urgent
+Medical Call,Public Safety and Welfare,Routine
+Medical Call - Oxygen,Public Safety and Welfare,Emergency
+Medical Call/Injury,Public Safety and Welfare,Urgent
+Mental Health Incident,Public Safety and Welfare,Emergency
+Municipal Property/Building Check,Public Safety and Welfare,Routine
+NARCAN Deployment - Adult - Aid,Public Safety and Welfare,Emergency
+Overdose - Adult - Aid,Public Safety and Welfare,Emergency
+Patrol Check,Public Safety and Welfare,Routine
+Patrol Check - Extra Duty Detail,Public Safety and Welfare,Routine
+Property Damage - City Property,Public Safety and Welfare,Routine
+Property Damage - Non-Criminal,Public Safety and Welfare,Routine
+Shopping Cart,Public Safety and Welfare,Routine
+Street Light,Public Safety and Welfare,Routine
+Structure Damage,Public Safety and Welfare,Urgent
+Suicidal Party,Public Safety and Welfare,Emergency
+TAPS - Business,Public Safety and Welfare,Routine
+TAPS - Housing,Public Safety and Welfare,Routine
+TAPS - Medical Facility,Public Safety and Welfare,Routine
+TAPS - Other,Public Safety and Welfare,Routine
+TAPS - Park,Public Safety and Welfare,Routine
+TAPS - Parking Garage,Public Safety and Welfare,Routine
+TAPS - Religious Facility,Public Safety and Welfare,Routine
+TAPS - School,Public Safety and Welfare,Routine
+Tree limb down,Public Safety and Welfare,Routine
+Unwanted Person,Public Safety and Welfare,Urgent
+Utility Incident,Public Safety and Welfare,Urgent
+Vacant House,Public Safety and Welfare,Routine
+Virtual - Patrol,Public Safety and Welfare,Routine
+Weather Alerts,Public Safety and Welfare,Routine
+Welfare Check,Public Safety and Welfare,Urgent
+Wire Down,Public Safety and Welfare,Urgent

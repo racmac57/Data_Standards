@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(unzip:*)",
+      "Bash(python -m json.tool:*)",
+      "Bash(ls:*)",
+      "Bash(zip:*)",
+      "Bash(rms_export_field_definitions.md )",
+      "Bash(cad_to_rms_field_map.json )",
+      "Bash(rms_to_cad_field_map.json )",
+      "Bash(multi_column_matching_strategy.md )",
+      "Bash(README.md )",
+      "Bash(CHANGELOG.md )",
+      "Bash(SUMMARY.md )",
+      "Bash(SCHEMA_FILES_SUMMARY.md )",
+      "Bash(RELEASE_NOTES.md )",
+      "Bash(sample_rms_export.csv)",
+      "Bash(powershell:*)",
+      "Bash(python validate_rms_export.py:*)",
+      "Bash(tree:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(du:*)",
+      "Bash(find:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nCreate archive structure and backup nested .git from unified_data_dictionary\n\n- Create archive/ folder structure \\(packages/, legacy_copies/, removed_duplicates/\\)\n- Add archive/README.md with retention policy\n- Backup unified_data_dictionary/.git to archive/legacy_copies/udd_git_backup/\n- Remove nested .git from unified_data_dictionary \\(now single repo\\)\n\nThis is commit 1/7 of the standards-restructure cleanup.\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)"
+    ]
+  }
+}

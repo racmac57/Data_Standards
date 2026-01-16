@@ -1,0 +1,26 @@
+Call_Type,Category,Response Type
+9-1-1 Call,Emergency Response,Emergency
+Abandoned 9-1-1 Emergency,Emergency Response,Emergency
+Alarm - Burglar,Emergency Response,Emergency
+Alarm - Fire,Emergency Response,Emergency
+Alarm - Panic,Emergency Response,Emergency
+Aviation Accident,Emergency Response,Emergency
+Bomb Scare,Emergency Response,Emergency
+D.O.A,Emergency Response,Emergency
+Disarm a Law Enforcement Officer,Emergency Response,Emergency
+Disarm a Law Enforcement Officer - Attempt,Emergency Response,Emergency
+Emergency Access Card Use,Emergency Response,Emergency
+Fight - Armed,Emergency Response,Emergency
+Fight - Unarmed,Emergency Response,Emergency
+Fire,Emergency Response,Emergency
+HAZ-MAT Incident,Emergency Response,Emergency
+Handle With Care - Notification,Emergency Response,Emergency
+Hostage Situation,Emergency Response,Emergency
+Service - FERPO,Emergency Response,Emergency
+Service - TERPO,Emergency Response,Emergency
+Shooting,Emergency Response,Emergency
+Shots Fired Investigation,Emergency Response,Emergency
+Stabbing,Emergency Response,Emergency
+Sudden Death Investigation,Emergency Response,Emergency
+Suicide,Emergency Response,Emergency
+Unintentional Discharge,Emergency Response,Emergency

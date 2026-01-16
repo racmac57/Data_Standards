@@ -1,0 +1,43 @@
+Call_Type,Category,Response Type
+ALPR Analysis,Investigations and Follow-Ups,Routine
+ALPR Flag,Investigations and Follow-Ups,Routine
+BOLO,Investigations and Follow-Ups,Urgent
+DNA Sample,Investigations and Follow-Ups,Routine
+Detective Bureau Detail,Investigations and Follow-Ups,Routine
+Discovery - Criminal,Investigations and Follow-Ups,Routine
+Discovery - Motor Vehicle,Investigations and Follow-Ups,Routine
+Discovery - Non Specific,Investigations and Follow-Ups,Routine
+Evidence Delivery,Investigations and Follow-Ups,Routine
+Evidence Retrieval,Investigations and Follow-Ups,Routine
+Facial Recognition Request,Investigations and Follow-Ups,Routine
+Field Contact/ Information,Investigations and Follow-Ups,Routine
+General Investigation,Investigations and Follow-Ups,Routine
+Investigation - Follow-Up,Investigations and Follow-Ups,Routine
+Investigation Follow-Up,Investigations and Follow-Ups,Routine
+Lo-Jack Hit - Tracking Signal,Investigations and Follow-Ups,Urgent
+Missing Person - Adult,Investigations and Follow-Ups,Urgent
+Missing Person - Return - Adult,Investigations and Follow-Ups,Routine
+Narcotics Investigation,Investigations and Follow-Ups,Urgent
+Pawned Item(s),Investigations and Follow-Ups,Routine
+Property - Found,Investigations and Follow-Ups,Routine
+Property - Lost,Investigations and Follow-Ups,Routine
+Property Recovered - Stolen,Investigations and Follow-Ups,Routine
+Recovered Stolen - Article,Investigations and Follow-Ups,Routine
+Recovered Stolen - Firearm,Investigations and Follow-Ups,Routine
+Recovered Stolen License Plate,Investigations and Follow-Ups,Routine
+Recovered Stolen Vehicle,Investigations and Follow-Ups,Routine
+Search Warrant Execution - CDW,Investigations and Follow-Ups,Urgent
+Search Warrant Execution - Structure,Investigations and Follow-Ups,Urgent
+Search Warrant Execution - Vehicle,Investigations and Follow-Ups,Urgent
+Search Warrant Execution- Structure,Investigations and Follow-Ups,Urgent
+Sex Offender - Address Verification,Investigations and Follow-Ups,Routine
+Sex Offender - Intent to Move,Investigations and Follow-Ups,Routine
+Sex Offender Investigation,Investigations and Follow-Ups,Routine
+Suspicious Activity Report,Investigations and Follow-Ups,Routine
+Suspicious Activity Submission,Investigations and Follow-Ups,Routine
+Suspicious Incident,Investigations and Follow-Ups,Urgent
+Suspicious Item,Investigations and Follow-Ups,Routine
+Suspicious Person,Investigations and Follow-Ups,Urgent
+Suspicious Vehicle,Investigations and Follow-Ups,Urgent
+TAS Alert - Stolen License Plate,Investigations and Follow-Ups,Urgent
+Unknown Investigation,Investigations and Follow-Ups,Routine

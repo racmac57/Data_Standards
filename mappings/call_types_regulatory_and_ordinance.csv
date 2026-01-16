@@ -1,0 +1,30 @@
+Call_Type,Category,Response Type
+ABC Advisory Check,Regulatory and Ordinance,Routine
+ABC Inspection,Regulatory and Ordinance,Routine
+ABC Violation,Regulatory and Ordinance,Routine
+Alarm Ordinance,Regulatory and Ordinance,Routine
+Alcoholic Beverage - Hours of Sale,Regulatory and Ordinance,Routine
+Alcoholic Beverage - New Years Day Hours of Sale,Regulatory and Ordinance,Routine
+Alcoholic Beverage - Serving Underage,Regulatory and Ordinance,Routine
+Alcoholic Beverage - Sunday Hours of Sale,Regulatory and Ordinance,Routine
+Alcoholic Beverage - Unlicensed Bartender,Regulatory and Ordinance,Routine
+Animal Complaint,Regulatory and Ordinance,Routine
+Animal Cruelty,Regulatory and Ordinance,Routine
+Canvassing without Permit,Regulatory and Ordinance,Routine
+City Ordinance,Regulatory and Ordinance,Routine
+City Ordinance Warning,Regulatory and Ordinance,Routine
+Construction Hours,Regulatory and Ordinance,Routine
+Dogs Defecating,Regulatory and Ordinance,Routine
+Dogs at Large,Regulatory and Ordinance,Routine
+Drinking in Public,Regulatory and Ordinance,Routine
+Fireworks Complaint,Regulatory and Ordinance,Routine
+Fish and Game Violation Title 23,Regulatory and Ordinance,Routine
+Illegal Dumping,Regulatory and Ordinance,Routine
+Noise Complaint,Regulatory and Ordinance,Routine
+Sale of Cigarettes to Minors - 2A:170-51,Regulatory and Ordinance,Routine
+Serving Alcohol to Minors - 2C:33-17,Regulatory and Ordinance,Routine
+Smoking Prohibited,Regulatory and Ordinance,Routine
+Snow Plowed onto Public Street,Regulatory and Ordinance,Routine
+Snow Removal,Regulatory and Ordinance,Routine
+Urinating in Public,Regulatory and Ordinance,Urgent
+Vending Without Permit,Regulatory and Ordinance,Routine

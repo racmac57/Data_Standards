@@ -1,0 +1,19 @@
+Call_Type,Category,Response Type
+A.T.R.A.,Special Operations and Tactical,Urgent
+Controlled Buy,Special Operations and Tactical,Routine
+Controlled CDS Purchase,Special Operations and Tactical,Urgent
+ESU - Response,Special Operations and Tactical,Emergency
+ESU - Training,Special Operations and Tactical,Routine
+PRD Activation,Special Operations and Tactical,Emergency
+Pursuit - Foot,Special Operations and Tactical,Emergency
+Pursuit - Motor Vehicle,Special Operations and Tactical,Emergency
+RDF Deployment,Special Operations and Tactical,Emergency
+RDT Deployment,Special Operations and Tactical,Emergency
+TAPS - ESU - Business,Special Operations and Tactical,Routine
+TAPS - ESU - Medical Facility,Special Operations and Tactical,Routine
+TAPS - ESU - Park,Special Operations and Tactical,Routine
+TAPS - ESU - Parking Garage,Special Operations and Tactical,Routine
+TAPS - ESU - Religious Facility,Special Operations and Tactical,Routine
+TAPS - ESU - School,Special Operations and Tactical,Routine
+UAS Operation,Special Operations and Tactical,Routine
+Undercover Buy,Special Operations and Tactical,Routine

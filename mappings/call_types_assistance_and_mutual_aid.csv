@@ -1,0 +1,22 @@
+Call_Type,Category,Response Type
+Assist Motorist,Assistance and Mutual Aid,Routine
+Assist Other Agency,Assistance and Mutual Aid,Routine
+Assist Own Agency (Backup),Assistance and Mutual Aid,Urgent
+Cooperative Arrest - Little Ferry,Assistance and Mutual Aid,Urgent
+Cooperative Arrest - Maywood,Assistance and Mutual Aid,Urgent
+Cooperative Arrest - Ridgefield Park,Assistance and Mutual Aid,Urgent
+Cooperative Arrest - So. Hackensack,Assistance and Mutual Aid,Urgent
+Courtesy Transport,Assistance and Mutual Aid,Routine
+D.P.W. Assist,Assistance and Mutual Aid,Routine
+Escort - Money,Assistance and Mutual Aid,Routine
+Fire Department Call,Assistance and Mutual Aid,Urgent
+Funeral Escort,Assistance and Mutual Aid,Routine
+Lock-Out Residence,Assistance and Mutual Aid,Routine
+Motor Vehicle Lock-out,Assistance and Mutual Aid,Routine
+Mutual Aid - E.M.S.,Assistance and Mutual Aid,Routine
+Mutual Aid - Fire,Assistance and Mutual Aid,Routine
+Mutual Aid - Police,Assistance and Mutual Aid,Routine
+Non-Emergency Assist,Assistance and Mutual Aid,Routine
+Parks Department Needed,Assistance and Mutual Aid,Routine
+Police Assist,Assistance and Mutual Aid,Routine
+Stranded Party,Assistance and Mutual Aid,Routine

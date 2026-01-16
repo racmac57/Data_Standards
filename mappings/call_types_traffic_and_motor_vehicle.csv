@@ -1,0 +1,47 @@
+Call_Type,Category,Response Type
+Abandoned Auto,Traffic and Motor Vehicle,Routine
+Blocked Driveway,Traffic and Motor Vehicle,Routine
+Breath Test - Refusal - 39:4-50.2,Traffic and Motor Vehicle,Routine
+Checked Road Conditions (Weather),Traffic and Motor Vehicle,Routine
+Disabled Motor Vehicle,Traffic and Motor Vehicle,Urgent
+Driving While Intoxicated - 39:4-50,Traffic and Motor Vehicle,Emergency
+Hazard - Pothole,Traffic and Motor Vehicle,Routine
+Hazardous Road Condition - Flooding,Traffic and Motor Vehicle,Urgent
+Hazardous Road Condition - General,Traffic and Motor Vehicle,Urgent
+Hazardous Road Condition - Ice,Traffic and Motor Vehicle,Urgent
+Leaving Scene of an Acc. - 39:4-129,Traffic and Motor Vehicle,Routine
+License Plate-Lost/Stolen,Traffic and Motor Vehicle,Routine
+Motor Vehicle - Private Property Tow,Traffic and Motor Vehicle,Routine
+Motor Vehicle Complaint,Traffic and Motor Vehicle,Routine
+Motor Vehicle Crash,Traffic and Motor Vehicle,Urgent
+Motor Vehicle Crash -  W/Injury,Traffic and Motor Vehicle,Emergency
+Motor Vehicle Crash -  w/injury,Traffic and Motor Vehicle,Emergency
+Motor Vehicle Crash - Bicyclist Struck,Traffic and Motor Vehicle,Emergency
+Motor Vehicle Crash - Hit and Run,Traffic and Motor Vehicle,Emergency
+Motor Vehicle Crash - Pedestrian Struck,Traffic and Motor Vehicle,Emergency
+Motor Vehicle Crash - Police Vehicle,Traffic and Motor Vehicle,Routine
+Motor Vehicle Crash - w/injury,Traffic and Motor Vehicle,Emergency
+Motor Vehicle Impound,Traffic and Motor Vehicle,Routine
+Motor Vehicle Stop,Traffic and Motor Vehicle,Urgent
+Motor Vehicle Violation,Traffic and Motor Vehicle,Routine
+Motor Vehicle Violation - Commercial Vehicle,Traffic and Motor Vehicle,Routine
+Motor Vehicle Violation - Private Property,Traffic and Motor Vehicle,Routine
+Overnight Parking,Traffic and Motor Vehicle,Routine
+Parking Complaint,Traffic and Motor Vehicle,Routine
+Parking Offense,Traffic and Motor Vehicle,Routine
+Poss. CDS in MV - 39:4-49.1,Traffic and Motor Vehicle,Routine
+Radar Detail,Traffic and Motor Vehicle,Routine
+Radar Trailer Deployed,Traffic and Motor Vehicle,Routine
+Repossessed Motor Vehicle,Traffic and Motor Vehicle,Routine
+Suspended Drivers License - 39:3-40,Traffic and Motor Vehicle,Routine
+Suspended Registration - 39:3-40,Traffic and Motor Vehicle,Routine
+Temporary Parking,Traffic and Motor Vehicle,Routine
+Traffic Bureau Report,Traffic and Motor Vehicle,Routine
+Traffic Detail,Traffic and Motor Vehicle,Routine
+Traffic Detail - Road Closure,Traffic and Motor Vehicle,Urgent
+Traffic Enforcement Detail,Traffic and Motor Vehicle,Routine
+Traffic Hazard,Traffic and Motor Vehicle,Urgent
+Traffic Light Malfunction,Traffic and Motor Vehicle,Routine
+Traffic Sign / Signal Malfunction,Traffic and Motor Vehicle,Urgent
+Uninsured Vehicle - 39:6b-2,Traffic and Motor Vehicle,Routine
+Unregistered Vehicle - 39:3-4,Traffic and Motor Vehicle,Routine
