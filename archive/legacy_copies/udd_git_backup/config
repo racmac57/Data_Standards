@@ -1,0 +1,28 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+[remote "origin"]
+	url = https://github.com/racmac57/unified_data_dictionary.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+	gk-last-accessed = 2025-12-18T05:34:15.982Z
+	gk-last-modified = 2025-12-18T05:34:15.982Z
+[remote "00_dev"]
+	url = git@github.com:racmac57/00_dev_utilities.git
+	fetch = +refs/heads/*:refs/remotes/00_dev/*
+[branch "release-notes/v0.2.1"]
+	vscode-merge-base = origin/main
+	remote = 00_dev
+	merge = refs/heads/release-notes/v0.2.1
+	gk-last-accessed = 2026-01-02T21:18:20.289Z
+	gk-last-modified = 2026-01-02T21:18:20.289Z
+[branch "docs/update-20260102-2124"]
+	vscode-merge-base = origin/main
+	gk-last-accessed = 2026-01-14T19:50:46.965Z
+	gk-last-modified = 2026-01-14T18:31:25.092Z

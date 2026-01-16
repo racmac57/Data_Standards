@@ -1,0 +1,13 @@
+docs: update version to 0.2.3 and organize scripts directory
+
+- Updated CHANGELOG.md with Process_UDD_Chatlog.bat v1.3.0 changes
+  - Added debug mode support and activity logging
+  - Documented workspace detection fixes and directory structure improvements
+- Updated SUMMARY.md and README.md version badges to 0.2.3
+- Reorganized scripts directory into logical subdirectories:
+  - tests/ - Test files and test runners
+  - processing/ - Chatlog processing scripts
+  - cleanup/ - Cleanup and maintenance scripts
+  - utilities/ - General utility scripts
+- Created scripts/README.md documenting new folder structure
+- Moved Process_UDD_Chatlog.bat back to scripts root (required for Directory Opus button)

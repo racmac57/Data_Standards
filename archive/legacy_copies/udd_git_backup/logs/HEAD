@@ -1,0 +1,21 @@
+0000000000000000000000000000000000000000 42516d68fad5be8f953cb23c463cc67b252f5279 Your Name <you@cityofhackensack.org> 1766010676 -0500	commit (initial): Initial commit: Unified Data Dictionary v0.1.0
+42516d68fad5be8f953cb23c463cc67b252f5279 0000000000000000000000000000000000000000 Your Name <you@cityofhackensack.org> 1766010676 -0500	Branch: renamed refs/heads/main to refs/heads/main
+42516d68fad5be8f953cb23c463cc67b252f5279 42516d68fad5be8f953cb23c463cc67b252f5279 Your Name <you@cityofhackensack.org> 1766010676 -0500	Branch: renamed refs/heads/main to refs/heads/main
+42516d68fad5be8f953cb23c463cc67b252f5279 2cc694d81c850bd25b8593fb54d964e6add7b02a Your Name <you@cityofhackensack.org> 1766010743 -0500	pull origin main --allow-unrelated-histories: Merge made by the 'ort' strategy.
+2cc694d81c850bd25b8593fb54d964e6add7b02a a9a765b7a6901c78ee88e24c2a6c0c5b8dea629c Your Name <you@cityofhackensack.org> 1766011033 -0500	commit: refactor: Move scripts to src/ and create working CLI
+a9a765b7a6901c78ee88e24c2a6c0c5b8dea629c 268225554ccda576300a259eee911e2074cc7288 Your Name <you@cityofhackensack.org> 1766011092 -0500	commit: docs: Add setup completion report
+268225554ccda576300a259eee911e2074cc7288 41d1fe0fa2c94dcabb59b19b38e9c494155c3b40 Your Name <you@cityofhackensack.org> 1766011785 -0500	commit: chore: Clean up root directory structure
+41d1fe0fa2c94dcabb59b19b38e9c494155c3b40 187f3adc98cbed9ba7c7cb0ef616edc1b0cfb0bd Your Name <you@cityofhackensack.org> 1766011828 -0500	commit: docs: Add directory cleanup documentation
+187f3adc98cbed9ba7c7cb0ef616edc1b0cfb0bd 246f3fdc97a50dfa6b031788ae876505bb4d7995 Your Name <you@cityofhackensack.org> 1766013295 -0500	commit: feat: Add automated chatlog processing workflow
+246f3fdc97a50dfa6b031788ae876505bb4d7995 358ce94d0ef98ec412ef9dc12dcab5b5fe6e4ba2 Your Name <you@cityofhackensack.org> 1766013348 -0500	commit: docs: Add TextExpander workflows reference guide
+358ce94d0ef98ec412ef9dc12dcab5b5fe6e4ba2 b056e928355002acd515e527e935204af9b86ac8 Your Name <you@cityofhackensack.org> 1766017092 -0500	commit: feat: Enhance project structure and organization (v0.2.0)
+b056e928355002acd515e527e935204af9b86ac8 53af1a5028715df8fcbe08d9ae24f83fcdcb98bc Your Name <you@cityofhackensack.org> 1766019924 -0500	commit: feat: Add streamlined chatlog processing workflow
+53af1a5028715df8fcbe08d9ae24f83fcdcb98bc 2f3d9bab671ad0766a6859aae6aeb25efeb65060 Your Name <you@cityofhackensack.org> 1766035467 -0500	commit: chore: docs(v0.2.1) + cleanup scripts; bump Process_UDD_Chatlog to v1.0.7
+2f3d9bab671ad0766a6859aae6aeb25efeb65060 269d61991deb7e42f53515a61a427085bf0fab1d Your Name <you@cityofhackensack.org> 1766035905 -0500	commit: chore(release): add v0.2.1 release_notes.md
+269d61991deb7e42f53515a61a427085bf0fab1d 269d61991deb7e42f53515a61a427085bf0fab1d Your Name <you@cityofhackensack.org> 1766036360 -0500	checkout: moving from main to release-notes/v0.2.1
+269d61991deb7e42f53515a61a427085bf0fab1d 269d61991deb7e42f53515a61a427085bf0fab1d Robert Carucci <racmac57@users.noreply.github.com> 1767389091 -0500	reset: moving to HEAD
+269d61991deb7e42f53515a61a427085bf0fab1d 269d61991deb7e42f53515a61a427085bf0fab1d Robert Carucci <racmac57@users.noreply.github.com> 1767389100 -0500	checkout: moving from release-notes/v0.2.1 to main
+269d61991deb7e42f53515a61a427085bf0fab1d 269d61991deb7e42f53515a61a427085bf0fab1d Robert Carucci <racmac57@users.noreply.github.com> 1767389101 -0500	checkout: moving from main to docs/update-20260102-2124
+269d61991deb7e42f53515a61a427085bf0fab1d 50d470801f14fa9be335539fe268c75193f69ae7 Robert Carucci <racmac57@users.noreply.github.com> 1767389101 -0500	commit: docs: update CHANGELOG, README, SUMMARY for v0.2.2 - Documentation and version updates
+50d470801f14fa9be335539fe268c75193f69ae7 42522bb5a45d19564549d37f720e20950904d4df Robert Carucci <racmac57@users.noreply.github.com> 1767389306 -0500	commit: fix: correct Python version configs in pyproject.toml
+42522bb5a45d19564549d37f720e20950904d4df e793867c6331291acbdcaded0f09c3ad83dd5e55 Robert Carucci <racmac57@users.noreply.github.com> 1768328768 -0500	commit: docs: update version to 0.2.3 and organize scripts directory

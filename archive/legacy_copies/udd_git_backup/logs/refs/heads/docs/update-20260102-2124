@@ -1,0 +1,4 @@
+0000000000000000000000000000000000000000 269d61991deb7e42f53515a61a427085bf0fab1d Robert Carucci <racmac57@users.noreply.github.com> 1767389101 -0500	branch: Created from HEAD
+269d61991deb7e42f53515a61a427085bf0fab1d 50d470801f14fa9be335539fe268c75193f69ae7 Robert Carucci <racmac57@users.noreply.github.com> 1767389101 -0500	commit: docs: update CHANGELOG, README, SUMMARY for v0.2.2 - Documentation and version updates
+50d470801f14fa9be335539fe268c75193f69ae7 42522bb5a45d19564549d37f720e20950904d4df Robert Carucci <racmac57@users.noreply.github.com> 1767389306 -0500	commit: fix: correct Python version configs in pyproject.toml
+42522bb5a45d19564549d37f720e20950904d4df e793867c6331291acbdcaded0f09c3ad83dd5e55 Robert Carucci <racmac57@users.noreply.github.com> 1768328768 -0500	commit: docs: update version to 0.2.3 and organize scripts directory
