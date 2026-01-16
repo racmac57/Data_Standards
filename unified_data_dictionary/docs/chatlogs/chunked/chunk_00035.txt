@@ -1,0 +1,483 @@
+- **Extended File Types**: Added `.yaml` and `.docx` support, bringing total supported file types to 16. - **Timestamp Format**: Consistent output folder naming: `YYYY_MM_dd_HH_MM_SS_[File_Name]` format documented and standardized. ### Performance Improvements & Reprocessing (2025-11-18–20)
+- **Batch Processing**: Configurable batch size (default 100 files per cycle) prevents system overload on large backlogs
+- **Stability Skip Optimization**: Files older than `stability_skip_minutes` (default 10) bypass expensive stability checks, dramatically reducing processing time for large backlogs
+- **Enhanced Parallel Processing**: Optional multiprocessing mode with automatic fallback to sequential processing on errors
+- **Archive Reprocessing**: New `reprocess_output.py` script enables reprocessing of archived files with enhanced tagging and department detection
+- **OneDrive Migration**: `migrate_to_onedrive.py` safely migrates local archives to OneDrive with conflict resolution and path length checks
+- **Department Configuration Refactoring**: Domain-aware department detection (20 specialized departments: python, cad, claude, data-cleaning, fire, ems, etc.) with tailored chunk sizes and settings
+- **Auto-Archival**: Optional weekly archival of old output sessions (>90 days) to `03_archive/consolidated/YYYY/MM/`
+- **Long Path Handling**: Automatic path shortening for Windows MAX_PATH limits (>240 characters)
+- **Version Conflict Resolution**: Automatic `_v2`, `_v3` suffix handling for sidecars and manifests to prevent overwrites
+- **Failed File Analysis**: New `analyze_failed_files.py` script provides comprehensive analysis of failed files by type, size, time patterns, and reprocessing potential
+- **OneDrive Failed Directory**: Failed files now use OneDrive path by default for consistency with archive and output directories (`failed_dir` in `config.json`)
+- **Failed File Tracker**: New `failed_file_tracker.py` module tracks failures with a SQLite backend, classifies failure types, applies capped retries with exponential backoff, and exposes CLI stats/exports
+- **Batch Failed-File Reprocessing**: New `batch_reprocess_failed.py` safely requeues retryable failures from `03_archive/failed` into `source/` with categorization (retryable vs permanent chunk vs tracker-permanent) and JSON stats
+- **Reprocessing Run Plan**: `REPROCESSING_RUN_PLAN.md` documents the end-to-end plan for reprocessing historical failures and confirming OneDrive outputs
+- **Reprocessing Metrics**: `reprocess_output.py` now tracks per-extension success/fail/skip counts and writes JSON reports to `05_logs/reprocess_stats.json`
+- **Enhanced PDF Processing**: `file_processors.py` now adds page markers (e.g. `=== [PAGE 1/10] ===`), extracts basic metadata (title, author, total pages), and handles encrypted PDFs gracefully with clear markers instead of hard failures
+- **Enhanced SLX Handling**: `.slx` (Simulink) support improved with larger per-file content limits (50 KB per XML/MDL file, 100 MB safety cap) and ZIP-based extraction
+
+### Recent Improvements (Post-v2.1.8)
+- **Tiny File Archiving**: Files under 100 bytes are automatically parked in `03_archive/skipped_files/` with their manifests to eliminate endless “too small” retries. - **Manifest & Hash Safety**: Watcher now skips any file containing `.origin.json` in its name and recomputes content hashes when the manifest is missing a checksum so incremental tracking remains intact. - **Chunk Writer Hardening**: Consolidated `write_chunk_files()` helper creates the directory once, writes UTF-8 chunks with defensive logging, and `copy_manifest_sidecar()` guarantees parent folders exist before copying manifests. - **Parallel Queue Handling**: Added optional `multiprocessing.Pool` batches for queues ≥32 files (config flag), plus automatic pruning of the `processed_files` set to prevent long-running watcher stalls. - **Tokenizer & Metrics Optimizations**: Sentence tokenization is LRU-cached, system metrics run on a background executor, and notification bursts are throttled with a 60-second rate limiter per alert key. - **SQLite Resilience**: Centralized `_conn()` helper sets 60 s timeouts, `log_error()` now understands both legacy signatures and retries lock errors, and `run_integrity_check()` validates the DB at startup. - **Test Coverage & Pytest Guardrails**: Root `conftest.py` skips bulky `99_doc/legacy` suites and `tests/test_db.py` smoke-tests the new retry path to ensure future regressions fail fast. - **Database Lock Monitoring**: `MONITOR_DB_LOCKS.md` documents command-line checks, baseline metrics (1.5 errors/min), and alert thresholds (3 errors/min = 2× baseline). - **Watcher Bridge Support**: `watcher_splitter.py` understands `.part` staging files, waits for optional `.ready` signals, retries processing up to three times, and quarantines stubborn failures to `03_archive/failed/`. - **Batched Chroma Ingest**: `ChromaRAG.add_chunks_bulk()` honours `batch.size`, skips null embeddings, and refreshes `hnsw:search_ef` from `config.json` so the vector store keeps pace with high-volume ingest. ### v2.1.8 Release (2025-11-07)
+- **ChromaDB Rebuild**: Upgraded to `chromadb 1.3.4`, recreated the collection, and re-ran the backfill so 2,907 enriched chunks are in sync with the latest pipeline. - **Dedup Reliability**: `deduplication.py` now ships with `hnswlib` compatibility shims, letting `python deduplication.py --auto-remove` complete without legacy metadata errors. - **Release Helper**: `scripts/release_commit_and_tag.bat` automates doc staging, backups, commit/tag creation, and pushes while rotating logs; the 2025-11-07 dry run and live validation are logged in `docs/RELEASE_WORKFLOW.md`. - **Regression Tests**: Replaced placeholder suites with 52-case pytest coverage for query caching, incremental updates, backup management, and monitoring to mirror the production APIs. - **Watcher & DB Resilience (Nov 2025)**: Skips manifests/archives/output files, sanitises output folder names, replaces Unicode logging arrows, adds safe archive moves, and introduces exponential-backoff SQLite retries to squash recursion, path-length, and “database locked” errors. > **What changed in v2.1.8? ** See the [changelog entry](./CHANGELOG.md#v218---2025-11-07---chromadb-rebuild--release-automation). ## 🚀 What's New in v2.1.6
+
+### 🚀 RAG Backfill Optimization
+- **Multiprocessing**: Parallel file processing and ChromaDB inserts with 4-8 workers
+- **Performance**: 20x faster backfill (100-200 chunks/second vs 5 chunks/second)
+- **Batch Optimization**: Optimized batch sizes (500-1000 chunks) for ChromaDB efficiency
+- **HNSW Tuning**: Proper vector index configuration (M=32, ef_construction=512, ef_search=200)
+- **CPU Monitoring**: Real-time CPU tracking with saturation alerts
+- **Duplicate Detection**: Pre-insertion verification prevents duplicate chunks
+- **Verification Tools**: Comprehensive scripts to verify backfill completeness
+
+### 📊 Verification & Validation
+- **Empty Folder Logging**: Identifies folders without chunk files
+- **Count Discrepancy Alerts**: Warns when expected vs actual counts differ
+- **Chunk Completeness Verification**: Validates all chunks from all folders are in KB
+- **Performance Metrics**: Detailed throughput, memory, and CPU statistics
+
+---
+
+## 🚀 What's New in v2.1.5
+
+### 📦 Move-Based Workflow (Grok Recommendations)
+- **⚡ Storage Optimization**: Reduced storage overhead by 50-60% via MOVE operations instead of COPY
+- **🔗 OneDrive Sync Elimination**: 100% reduction in sync overhead by moving files out of OneDrive
+- **📋 Manifest Tracking**: Complete origin tracking with `.origin.json` files
+- **🔄 Enhanced Archive**: MOVE with 3 retry attempts and graceful fallback to COPY
+- **🎯 Department Organization**: Automatic folder structure in archive by department
+- **🔍 Smart Retry Logic**: Handles Windows permission issues with automatic retries
+
+---
+
+## 🚀 What's New in v2.1.2
+
+### 🚨 Critical Performance Fixes
+- **⚡ Processing Loop Resolution**: Fixed infinite loops that caused system hangs
+- **📁 Smart File Archiving**: Failed files automatically moved to organized archive folders
+- **🔒 Database Stability**: Eliminated "database is locked" errors with batch operations
+- **⚡ 8-12x Speed Improvement**: Dynamic parallel workers and optimized processing
+
+### 🚀 Performance Enhancements
+- **🔍 Advanced RAG System**: Ollama + FAISS for local embeddings and semantic search
+- **📊 Comprehensive Evaluation**: Precision@K, Recall@K, MRR, ROUGE, BLEU, Faithfulness scoring
+- **🔗 LangSmith Integration**: Tracing, evaluation, and feedback collection
+- **⚡ Real-time Monitoring**: Watchdog-based file system monitoring with debouncing
+- **🤖 Hybrid Search**: Combines semantic similarity with keyword matching
+- **📈 Automated Evaluation**: Scheduled testing with regression detection
+- **🛡️ Production Ready**: Graceful degradation, error handling, and monitoring
+- **📂 Source Folder Copying**: Configurable copying of processed files back to source locations
+
+## Directory Structure
+
+- **C:/_chunker** - Main project directory with scripts
+- **02_data/** - Input files to be processed (watch folder)
+- **03_archive/** - Archived original files and processed source files
+- **03_archive/skipped_files/** - Files too small to process (< 100 bytes) - automatically archived
+- **04_output/** - Generated chunks and transcripts (organized by source file)
+- **05_logs/** - Application logs and tracking
+- **06_config/** - Configuration files
+- **99_doc/legacy/** - Consolidated legacy docs (latest snapshot per project)
+- **06_config/legacy/** - Consolidated legacy config (latest snapshot per project)
+- **05_logs/legacy/** - Consolidated legacy logs (latest snapshot per project)
+- **03_archive/legacy/** - Consolidated legacy db/backups (latest snapshot per project)
+- **chroma_db/** - ChromaDB vector database storage
+- **faiss_index/** - FAISS vector database storage
+- **evaluations/** - RAG evaluation results
+- **reports/** - Automated evaluation reports
+
+## 🚀 Quick Start
+
+### Basic Usage (Core Chunking)
+1. Place files to process in `02_data/` folder
+2. Run the watcher: `python watcher_splitter.py`
+3. Check `04_output/` for processed chunks and transcripts
+4. Original files are moved to `03_archive/` after processing
+
+### Advanced Usage (RAG-Enabled)
+1. Install RAG dependencies: `python install_rag_dependencies.py`
+2. Install Ollama and pull model: `ollama pull nomic-embed-text`
+3. Enable RAG in `config.json`: Set `"rag_enabled": true`
+4. Run the watcher: `python watcher_splitter.py`
+5. Search knowledge base: `python rag_search.py`
+
+### Advanced Usage (Celery-Enabled)
+For high-volume processing and advanced task management:
+
+1. **Install Celery Dependencies**:
+   ```bash
+   pip install celery redis flower
+   ```
+
+2. **Start Redis Server**:
+   ```bash
+   # Windows: Download from https://github.com/microsoftarchive/redis/releases
+   redis-server
+   
+   # Linux: sudo apt-get install redis-server
+   # macOS: brew install redis
+   ```
+
+3. **Start Celery Services**:
+   ```bash
+   # Option A: Use orchestrator (recommended)
+   python orchestrator.py
+   
+   # Option B: Start manually
+   celery -A celery_tasks worker --loglevel=info --concurrency=4
+   celery -A celery_tasks beat --loglevel=info
+   celery -A celery_tasks flower --port=5555
+   python enhanced_watchdog.py
+   ```
+
+4. **Monitor Tasks**:
+   - Flower Dashboard: http://localhost:5555 (with authentication)
+   - Celery CLI: `celery -A celery_tasks inspect active`
+   - Logs: Check `logs/watcher.log`
+
+5. **Security & Priority Features**:
+   - **Flower Authentication**: Default credentials logged on startup
+   - **Priority Queues**: High-priority processing for legal/police files
+   - **Redis Fallback**: Automatic fallback to direct processing if Redis fails
+   - **Task Timeouts**: 300s hard limit with graceful handling
+
+6. **Configuration**:
+   ```json
+   {
+     "celery_enabled": true,
+     "celery_broker": "redis://localhost:6379/0",
+     "celery_task_time_limit": 300,
+     "celery_worker_concurrency": 4,
+     "priority_departments": ["legal", "police"]
+   }
+   ```
+
+7. **Environment Variables** (Optional):
+   ```bash
+   export FLOWER_USERNAME="your_username"
+   export FLOWER_PASSWORD="your_secure_password"
+   ```
+
+## ⚙️ Feature Toggles & Setup
+
+All new subsystems ship **disabled by default** so existing deployments behave exactly as before. Enable individual features by updating `config.json` in the project root. ### Metadata Enrichment (`metadata_enrichment`)
+- Adds semantic tags, key terms, summaries, and source metadata to chunk sidecars and manifests. - Output schema documented in `docs/METADATA_SCHEMA.md`. - Enable with:
+  ```json
+  "metadata_enrichment": { "enabled": true }
+  ```
+
+### Monitoring & Health Checks (`monitoring`)
+- Background thread performs disk, throughput, and ChromaDB checks and escalates via the notification system. - Configure thresholds in `config.json` under the `monitoring` section; default recipients come from `notification_system.py`. - Start by setting `"monitoring": { "enabled": true }`. ### Database Lock Monitoring
+- **Current Performance**: 1.5 database lock errors/minute baseline (68% reduction from previous)
+- **Monitoring Documentation**: See `MONITOR_DB_LOCKS.md` for comprehensive monitoring commands and alert thresholds
+- **Real-time Monitoring**:
+  ```bash
+  # Watch for lock errors in real-time
+  powershell -Command "Get-Content watcher_live.log -Wait | Select-String -Pattern 'Failed to log|database is locked'"
+
+  # Check hourly error count
+  powershell -Command "(Get-Content watcher_live.log | Select-String -Pattern 'Failed to log processing' | Select-Object -Last 100 | Measure-Object).Count"
+  ```
+- **Alert Threshold**: Flag if errors exceed 3/minute (2x current baseline)
+- **Review Schedule**: Monitor every 8-12 hours using commands in `MONITOR_DB_LOCKS.md`
+- **Key Findings**:
+  - 92% of lock errors occur in `log_processing()` (lacks retry wrapper)
+  - 8% in `_update_department_stats()` (has 5-retry exponential backoff)
+  - Current retry config: get_connection (3 retries), dept_stats (5 retries with 1.5x backoff)
+
+### Tiny File Handling
+- **Automatic Archiving**: Files under 100 bytes (default `min_file_size_bytes`) are automatically moved to `03_archive/skipped_files/`
+- **Examples**: Empty files, "No measures found" messages, test placeholders
+- **Behavior**: Files are preserved with their `.origin.json` manifests for review rather than deleted or left to trigger repeated warnings
+- **Configuration**: Adjust threshold in department config via `min_file_size_bytes` parameter (default: 100)
+- **Logs**: Look for `[INFO] File too short (X chars), archiving: filename` messages
+
+### Deduplication (`deduplication`)
+- Prevents duplicate chunks from entering ChromaDB in both watcher and backfill flows. - Optionally run cleanup via `python deduplication.py --auto-remove`. - Already present in `config.json`; flip `"enabled": true` to activate. ### Query Cache (`query_cache`)
+- Enables an in-memory LRU + TTL cache in `rag_integration.py` so repeat queries avoid hitting ChromaDB. - Configure `max_size`, `ttl_hours`, and optional `memory_limit_mb` under the `query_cache` section. - API users can inspect runtime metrics via `GET /api/cache/stats` once the cache is enabled. - Minimal example:
+  ```json
+  "query_cache": {
+    "enabled": true,
+    "max_size": 256,
+    "ttl_hours": 1,
+    "memory_limit_mb": 64
+  }
+  ```
+
+### Incremental Updates (`incremental_updates`)
+- Uses a shared `VersionTracker` to hash inputs, skip untouched files, remove old chunk IDs, and persist deterministic chunk identifiers. - Tracker state defaults to `06_config/file_versions.json` (override with `version_file`). - Typical configuration:
+  ```json
+  "incremental_updates": {
+    "enabled": true,
+    "version_file": "06_config/file_versions.json",
+    "hash_algorithm": "sha256"
+  }
+  ```
+- After enabling, unchanged files are skipped by the watcher/backfill, while reprocessed sources clean up stale artifacts before writing new chunks. ### Backup Manager (`backup`)
+- Creates compressed archives of ChromaDB and critical directories on a schedule. - Configure destination, retention, and schedule in the `backup` section. - Manual run: `python backup_manager.py --config config.json create --label on-demand`. After toggling features, restart the watcher (`python watcher_splitter.py`) so runtime components reinitialize with the new configuration. ## ✨ Features
+
+### Core Chunking
+- [x] **Organized output** by source file name with timestamp prefixes
+- [x] **Multi-file type support** - .txt, .md, .json, .csv, .xlsx, .pdf, .py, .docx, .sql, .yaml, .xml, .log
+- [x] **Unicode filename support** - Handles files with emojis, special characters, and symbols
+- [x] **Enhanced filename sanitization** - Automatically cleans problematic characters
+- [x] **Database tracking and logging** - Comprehensive activity monitoring
+- [x] **Automatic file organization** - Moves processed files to archive
+
+### RAG System (v2.0)
+- [x] **Ollama Integration** - Local embeddings with nomic-embed-text model
+- [x] **FAISS Vector Database** - High-performance similarity search
+- [x] **Hybrid Search** - Combines semantic similarity with keyword matching
+- [x] **ChromaDB Support** - Alternative vector database (optional)
+- [x] **Real-time Monitoring** - Watchdog-based file system monitoring
+- [x] **Debounced Processing** - Prevents race conditions and duplicate processing
+
+### Performance & Scalability (v2.1.2+)
+- [x] **Dynamic Parallel Processing** - Up to 12 workers for large batches (50+ files)
+- [x] **Batch Processing** - Configurable batch sizes with system overload protection (default 100 files per cycle)
+- [x] **Stability Skip Optimization** - Files >10 minutes old bypass stability checks (configurable via `stability_skip_minutes`)
+- [x] **Database Optimization** - Batch logging eliminates locking issues
+- [x] **Smart File Archiving** - Failed files automatically moved to organized folders
+- [x] **Real-time Performance Metrics** - Files/minute, avg processing time, peak CPU/memory
+- [x] **Large Backlog Support** - Handles 5,000+ file backlogs efficiently (3.5 hours → 53 minutes for 6,500 files)
+- [x] **Source Folder Copying** - Configurable copying of processed files back to source locations
+- [x] **Multiprocessing Support** - Optional process pool for CPU-bound workloads with automatic fallback
+
+### Evaluation & Quality Assurance
+- [x] **Comprehensive Metrics** - Precision@K, Recall@K, MRR, NDCG@K
+- [x] **Generation Quality** - ROUGE-1/2/L, BLEU, BERTScore
+- [x] **Faithfulness Scoring** - Evaluates answer grounding in source context
+- [x] **Context Utilization** - Measures how much context is used in answers
+- [x] **Automated Evaluation** - Scheduled testing with regression detection
+- [x] **LangSmith Integration** - Tracing, evaluation, and feedback collection
+
+### Production Features
+- [x] **Graceful Degradation** - Continues working even if RAG components fail
+- [x] **Error Handling** - Robust error recovery and logging
+- [x] **Performance Monitoring** - System metrics and performance tracking
+- [x] **Security Redaction** - PII masking in metadata
+- [x] **Modular Architecture** - Clean separation of concerns
+- [x] **JSON Sidecar (optional)** - Per-file sidecar with chunk list, metadata, and Python code blocks
+
+### Windows “Send to” (Optional Helper)
+To quickly drop files into `02_data` via right‑click:
+1. Press Win+R → type `shell:sendto` → Enter
+2. New → Shortcut → Target: `C:\_chunker\02_data` → Name: `Send to Chunker (02_data)`
+3. Right‑click any file → Send to → `Send to Chunker (02_data)`
+
+Optional PowerShell variant (recommended): `SendTo\Chunker.ps1` + `Chunker.bat`
+- Recursively copies files/folders into `02_data`, preserving relative paths
+- Writes `<filename>.origin.json` manifest (original_full_path, times, size, sha256, optional hmac)
+- Watcher reads the manifest and populates sidecar `origin` (falls back if missing)
+
+Notes
+- Discovery is recursive under `02_data` and case-insensitive for extensions
+- Optional sidecar copy-back to `source/` is enabled via `copy_sidecar_to_source`
+
+## KB Operations (OneDrive)
+
+**Primary PC**
+- Start watcher: `powershell -File scripts/Start-Watcher.ps1`
+- Stop watcher: `powershell -File scripts/Stop-Watcher.ps1`
+- Smoke test: `powershell -File scripts/Smoke-Test.ps1`
+- Health: `powershell -File scripts/KB-Health.ps1`
+- Run report: `powershell -File tools/write_run_report.ps1`
+- Config check: `npm run kb:cfg:check`
+- Analytics snapshot: `npm run kb:analytics` (pass `-- --days 7` for weekly view)
+- Toggle dedupe: `npm run kb:cfg:dedupe:on` / `npm run kb:cfg:dedupe:off`
+- Toggle incremental updates: `npm run kb:cfg:incr:on` / `npm run kb:cfg:incr:off`
+- Consistency check: `npm run kb:consistency`
+
+**Secondary PC**
+- Do not start the watcher. - Use `streamlit run gui_app.py` for search and answers. **Notes**
+- Only one watcher process should run. - OneDrive folder must be set to Always keep on this device. - Duplicate protection is active through incremental updates and de-dup logic. - To auto-start on login, import `scripts/KB_Watcher_StartOnLogin.xml` in Task Scheduler (Action → Import Task) and confirm the action path points to `C:\_chunker`. - After import or any restart, run `npm run kb:health` to verify a single `Running (PID=…)` instance. - Weekly maintenance: import `scripts/KB_Weekly_Dedupe.xml` to schedule Monday 09:00 cleanups (dedupe + run report) or run manually with `npm run kb:report`. ## 🔄 Consolidation (2025-10-29)
+- New sidecar flags (config.json):
+  - `enable_json_sidecar` (default: true)
+  - `enable_block_summary` (default: true)
+  - `enable_grok` (default: false)
+
+Sidecar schema (high-level):
+- `file`, `processed_at`, `department`, `type`, `output_folder`, `transcript`
+- `chunks[]`: filename, path, size, index
+- `code_blocks[]` (for .py): type, name, signature, start_line, end_line, docstring
+
+- Older project iterations (e.g., ClaudeExportFixer, chat_log_chunker_v1, chat_watcher) were unified under `C:\_chunker`. - Historical outputs migrated to `C:\_chunker\04_output\<ProjectName>_<timestamp>`. - Legacy artifacts captured once per project (latest snapshot only):
+  - Docs → `99_doc\legacy\<ProjectName>_<timestamp>`
+  - Config → `06_config\legacy\<ProjectName>_<timestamp>`
+  - Logs → `05_logs\legacy\<ProjectName>_<timestamp>`
+  - DB/Backups → `03_archive\legacy\<ProjectName>_<timestamp>`
+- Script backups stored with timestamp prefixes at
+  `C:\Users\carucci_r\OneDrive - City of Hackensack\00_dev\backup_scripts\<ProjectName>\`. - Policy: keep only the latest legacy snapshot per project (older snapshots pruned). ## ⚙️ Configuration
+
+Edit `config.json` to customize:
+
+### Core Settings
+- **File filter modes**: all, patterns, suffix
+- **Supported file extensions**: .txt, .md, .json, .csv, .xlsx, .pdf, .py, .docx, .sql, .yaml, .xml, .log
+- **Chunk sizes and processing options**: sentence limits, overlap settings
+- **Notification settings**: email alerts and summaries
+
+### RAG Settings
+- **`rag_enabled`**: Enable/disable RAG functionality
+- **`ollama_model`**: Ollama embedding model (default: nomic-embed-text)
+- **`faiss_persist_dir`**: FAISS index storage directory
+- **`chroma_persist_dir`**: ChromaDB storage directory (optional)
+
+### LangSmith Settings (Optional)
+- **`langsmith_api_key`**: Your LangSmith API key
+- **`langsmith_project`**: Project name for tracing
+- **`tracing_enabled`**: Enable/disable tracing
+- **`evaluation_enabled`**: Enable/disable evaluation
+
+### Monitoring Settings
+- **`debounce_window`**: File event debouncing time (seconds)
+- **`use_ready_signal`**: Wait for `<filename>.ready` markers before processing atomic pushes
+- **`failed_dir`**: Directory for failed file processing quarantine
+- **`max_workers`**: Maximum parallel processing workers
+
+### Vector Store Settings
+- **`batch.size`**: Number of chunks to insert into ChromaDB per batch (default 500)
+- **`batch.flush_every`**: Optional flush cadence for very large ingest jobs
+- **`batch.mem_soft_limit_mb`**: Soft memory cap for batching helper
+- **`search.ef_search`**: Overrides HNSW search ef after each batch to rebalance recall vs. latency
+
+## 🔍 RAG Usage
+
+### Setup
+1. **Install Dependencies**: `python install_rag_dependencies.py`
+2. **Install Ollama**: Download from [ollama.ai](https://ollama.ai/)
+3. **Pull Model**: `ollama pull nomic-embed-text`
+4. **Enable RAG**: Set `"rag_enabled": true` in `config.json`
+5. **Start Processing**: `python watcher_splitter.py`
+
+### Search Knowledge Base
+
+#### Interactive Search
+```bash
+python rag_search.py
+```
+
+#### Command Line Search
+```bash
+# Single query
+python rag_search.py --query "How do I fix vlookup errors?" # Batch search
+python rag_search.py --batch queries.txt --output results.json
+
+# Different search types
+python rag_search.py --query "Excel formulas" --search-type semantic
+python rag_search.py --query "vlookup excel" --search-type keyword
+```
+
+#### GUI Search
+```bash
+streamlit run gui_app.py
+```
+Opens a browser interface for entering queries, browsing results, and viewing knowledge-base statistics. #### Programmatic Search
+```python
+from ollama_integration import initialize_ollama_rag
+
+# Initialize RAG system
+rag = initialize_ollama_rag()
+
+# Search
+results = rag.hybrid_search("How do I fix vlookup errors? ", top_k=5)
+
+# Display results
+for result in results:
+    print(f"Score: {result['score']:.3f}")
+    print(f"Content: {result['content'][:100]}...")
+    print(f"Source: {result['metadata']['source_file']}")
+```
+
+### Example Output
+
+**Interactive Search Session:**
+```
+RAG Search Interface
+==================================================
+Commands:
+  search <query> - Search the knowledge base
+  semantic <query> - Semantic similarity search
+  keyword <query> - Keyword-based search
+  stats - Show knowledge base statistics
+  quit - Exit the interface
+
+RAG> search How do I fix vlookup errors? Search Results for: 'How do I fix vlookup errors?' ==================================================
+
+1. Score: 0.847 (semantic)
+   Source: excel_guide.md
+   Type: .md
+   Content: VLOOKUP is used to find values in a table. Syntax: VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup]). Use FALSE for exact matches...
+   Keywords: vlookup, excel, formula, table
+
+2. Score: 0.723 (semantic)
+   Source: troubleshooting.xlsx
+   Type: .xlsx
+   Content: Common VLOOKUP errors include #N/A when lookup value not found, #REF when table array is invalid...
+   Keywords: vlookup, error, troubleshooting, excel
+
+Search completed in 0.234 seconds
+Found 2 results
+```
+
+## 📊 Evaluation & Testing
+
+### Automated Evaluation
+```bash
+# Run comprehensive evaluation
+python automated_eval.py
+
+# Run specific tests
+python rag_test.py
+
+# Generate evaluation report
+python -c "from automated_eval import AutomatedEvaluator; evaluator = AutomatedEvaluator({}); evaluator.generate_csv_report()"
+```
+
+### Manual Evaluation
+```python
+from rag_evaluation import RAGEvaluator
+from rag_integration import FaithfulnessScorer
+
+# Initialize evaluator
+evaluator = RAGEvaluator()
+
+# Evaluate retrieval quality
+retrieval_metrics = evaluator.evaluate_retrieval(
+    retrieved_docs=["doc1.md", "doc2.xlsx"],
+    relevant_docs=["doc1.md", "doc2.xlsx", "doc3.pdf"],
+    k_values=[1, 3, 5]
+)
+
+# Evaluate generation quality
+generation_metrics = evaluator.evaluate_generation(
+    reference="Check data types and table references",
+    generated="Verify data types and table references for vlookup errors"
+)
+
+# Evaluate faithfulness
+scorer = FaithfulnessScorer()
+faithfulness_score = scorer.calculate_faithfulness(
+    answer="VLOOKUP requires exact data types",
+    context="VLOOKUP syntax requires exact data type matching"
+)
+
+print(f"Precision@5: {retrieval_metrics['precision_at_5']:.3f}")
+print(f"ROUGE-1: {generation_metrics['rouge1']:.3f}")
+print(f"Faithfulness: {faithfulness_score:.3f}")
+```
+
+### LangSmith Integration
+```python
+from langsmith_integration import initialize_langsmith
+
+# Initialize LangSmith
+langsmith = initialize_langsmith(
+    api_key="your_api_key",
+    project="chunker-rag-eval"
+)
+
+# Create evaluation dataset
+test_queries = [
+    {
+        "query": "How do I fix vlookup errors?

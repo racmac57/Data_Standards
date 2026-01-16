@@ -1,0 +1,39 @@
+{
+  "tags": [
+    "RAG",
+    "automation",
+    "config",
+    "data cleaning",
+    "docs",
+    "input/output",
+    "markdown",
+    "police",
+    "schema",
+    "sql",
+    "workflow"
+  ],
+  "metadata_enrichment": {
+    "metadata": {
+      "project_name": "02_data",
+      "source_type": "documentation",
+      "language": "en",
+      "department": "admin",
+      "key_terms": [
+        "git",
+        "onedrive",
+        "checking",
+        "users",
+        "carucci_r",
+        "city"
+      ],
+      "enrichment_version": "1.0.0"
+    },
+    "summaries": {
+      "file_summary": "# CAD Data Cleaning Engine updates\n_Exported on 12/21/2025 at 18:58:25 EST from Cursor (2.2.43)_\n\n---\n\n**User**\n\nhttps://github.com/racmac57/CAD_Data_Cleaning_Engine.git pull the updates to the linked guthub repo\n\n---\n\n**Cursor**\n\n\nCheck...",
+      "first_line": "# CAD Data Cleaning Engine updates"
+    },
+    "enrichment_version": "1.0.0"
+  },
+  "last_processed_at": "2025-12-21T18:58:49.762318",
+  "department": "admin"
+}

@@ -1,0 +1,129 @@
+{
+  "source_file": "Excel_Workbook_Perplexity_Optimization_STACP.md",
+  "source_path": "C:\\_chunker\\02_data\\Excel_Workbook_Perplexity_Optimization_STACP.md",
+  "manifest_path": "C:\\Users\\carucci_r\\OneDrive - City of Hackensack\\KB_Shared\\04_output\\2026_01_05_18_51_40_Excel_Workbook_Perplexity_Optimization_STACP\\2026_01_05_18_51_40_Excel_Workbook_Perplexity_Optimization_STACP.origin.json",
+  "created_at": "2026_01_05_18_51_40",
+  "tags": [
+    "ai",
+    "code",
+    "config",
+    "data",
+    "docs",
+    "error handling",
+    "excel",
+    "function",
+    "input/output",
+    "it-ops",
+    "json",
+    "markdown",
+    "police",
+    "python",
+    "regex",
+    "sql",
+    "training",
+    "variable"
+  ],
+  "metadata": {
+    "project_name": "02_data",
+    "source_type": "documentation",
+    "language": "en",
+    "department": "admin",
+    "key_terms": [
+      "https",
+      "ppl-ai-file-upload",
+      "amazonaws",
+      "com",
+      "web",
+      "direct-files"
+    ],
+    "enrichment_version": "1.0.0"
+  },
+  "summaries": {
+    "file_summary": "<img src=\"https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png\" style=\"height:64px;margin-right:32px\"/>\n\n## Yes — Add the Python Project Files\n\nThe Python project documentation would be extremely helpful for designing the rig...",
+    "first_line": "<img src=\"https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png\" style=\"height:64px;margin-right:32px\"/>"
+  },
+  "chunks": [
+    {
+      "chunk_id": "2026-01-05T18:51:40+00:00_Excel_Workbook_Perplexity_Optimization_STACP_chunk1",
+      "chunk_index": 1,
+      "file": "chunk_00000.txt",
+      "tags": [
+        "ai",
+        "amazonaws",
+        "code",
+        "config",
+        "data",
+        "docs",
+        "error handling",
+        "excel",
+        "function",
+        "https",
+        "input/output",
+        "it-ops",
+        "json",
+        "markdown",
+        "police",
+        "ppl-ai-file-upload",
+        "python",
+        "regex",
+        "sql",
+        "training",
+        "variable"
+      ],
+      "key_terms": [
+        "python",
+        "https",
+        "csv",
+        "ppl-ai-file-upload",
+        "amazonaws",
+        "com"
+      ],
+      "summary": "<img src=\"https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png\" style=\"height:64px;margin-right:32px\"/>\n\n## Yes — Add the Python Project Files\n\nThe Python project documentation would be extremely helpful for designing the rig...",
+      "char_length": 29612,
+      "byte_length": 30771
+    },
+    {
+      "chunk_id": "2026-01-05T18:51:40+00:00_Excel_Workbook_Perplexity_Optimization_STACP_chunk2",
+      "chunk_index": 2,
+      "file": "chunk_00001.txt",
+      "tags": [
+        "ai",
+        "amazonaws",
+        "code",
+        "columns",
+        "config",
+        "data",
+        "direct-files",
+        "docs",
+        "error handling",
+        "excel",
+        "function",
+        "https",
+        "input/output",
+        "it-ops",
+        "json",
+        "markdown",
+        "monitoring",
+        "police",
+        "ppl-ai-file-upload",
+        "python",
+        "regex",
+        "sql",
+        "training",
+        "variable"
+      ],
+      "key_terms": [
+        "https",
+        "ppl-ai-file-upload",
+        "amazonaws",
+        "com",
+        "web",
+        "direct-files"
+      ],
+      "summary": "Smith\", \"Lt.",
+      "char_length": 20722,
+      "byte_length": 21265
+    }
+  ],
+  "enrichment_version": "1.0.0"
+}

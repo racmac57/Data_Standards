@@ -1,0 +1,195 @@
+│
+│   487 +  - **Source Field**: `Make1` (RMS export)                                                                                              │
+│   488 +  - **Format**: Text string                                                                                                             │
+│   489 +    - **Examples**: `Ford`, `Toyota`, `Honda`, `Chevrolet`, `BMW`, `Mercedes-Benz`                                                      │
+│   490 +  - **Logic**: User-entered or selected from vehicle make lookup table                                                                  │
+│   491 +  - **Validation Rules**:                                                                                                               │
+│   492 +    - May be null                                                                                                                       │
+│   493 +    - Should match against known vehicle make list if available (e.g., NCIC vehicle make codes)                                         │
+│   494 +    - Recommend standardizing capitalization and spelling                                                                               │
+│   495 +  - **Mapping Notes**:                                                                                                                  │
+│   496 +    - Used for vehicle description and identification                                                                                   │
+│   497 +    - Can be used for pattern analysis (e.g., most stolen makes)                                                                        │
+│   498 +  - **Group**: Vehicle                                                                                                                  │
+│   499 +                                                                                                                                        │
+│   500 +  ---                                                                                                                                   │
+│   501 +                                                                                                                                        │
+│   502 +  ### Model1                                                                                                                            │
+│   503 +                                                                                                                                        │
+│   504 +  **Export Header**: `Model1`                                                                                                           │
+│   505 +                                                                                                                                        │
+│   506 +  - **Definition**: Vehicle model for the first vehicle involved in the incident. │
+│   507 +  - **Source Field**: `Model1` (RMS export)                                                                                             │
+│   508 +  - **Format**: Text string                                                                                                             │
+│   509 +    - **Examples**: `F-150`, `Camry`, `Civic`, `Silverado`, `3 Series`, `C-Class`                                                       │
+│   510 +  - **Logic**: User-entered or selected from vehicle model lookup table                                                                 │
+│   511 +  - **Validation Rules**:                                                                                                               │
+│   512 +    - May be null                                                                                                                       │
+│   513 +    - Should match against known vehicle model list if available                                                                        │
+│   514 +    - Recommend validation against make-model combinations (e.g., Ford Camry is invalid)                                                │
+│   515 +  - **Mapping Notes**:                                                                                                                  │
+│   516 +    - Used for vehicle description and identification                                                                                   │
+│   517 +    - Combined with `Make1` provides full vehicle description                                                                           │
+│   518 +  - **Group**: Vehicle                                                                                                                  │
+│   519 +                                                                                                                                        │
+│   520 +  ---                                                                                                                                   │
+│   521 +                                                                                                                                        │
+│   522 +  ### Registration2                                                                                                                     │
+│   523 +                                                                                                                                        │
+│   524 +  **Export Header**: `Registration 2`                                                                                                   │
+│   525 +                                                                                                                                        │
+│   526 +  - **Definition**: Vehicle registration/license plate number for the second vehicle involved in the incident. │
+│   527 +  - **Source Field**: `Registration 2` (RMS export)                                                                                     │
+│   528 +  - **Format**: Text string (same format as `Registration1`)                                                                            │
+│   529 +  - **Logic**: User-entered from observation or DMV lookup                                                                              │
+│   530 +  - **Validation Rules**: Same as `Registration1`                                                                                       │
+│   531 +  - **Mapping Notes**:                                                                                                                  │
+│   532 +    - Used when multiple vehicles are involved (e.g., motor vehicle accidents, two-vehicle thefts)                                      │
+│   533 +  - **Group**: Vehicle                                                                                                                  │
+│   534 +                                                                                                                                        │
+│   535 +  ---                                                                                                                                   │
+│   536 +                                                                                                                                        │
+│   537 +  ### RegState2                                                                                                                         │
+│   538 +                                                                                                                                        │
+│   539 +  **Export Header**: `Reg State 2`                                                                                                      │
+│   540 +                                                                                                                                        │
+│   541 +  - **Definition**: State abbreviation for the second vehicle registration. │
+│   542 +  - **Source Field**: `Reg State 2` (RMS export)                                                                                        │
+│   543 +  - **Format**: Two-letter US state abbreviation                                                                                        │
+│   544 +  - **Validation Rules**: Same as `RegState1`                                                                                           │
+│   545 +  - **Group**: Vehicle                                                                                                                  │
+│   546 +                                                                                                                                        │
+│   547 +  ---                                                                                                                                   │
+│   548 +                                                                                                                                        │
+│   549 +  ### Make2                                                                                                                             │
+│   550 +                                                                                                                                        │
+│   551 +  **Export Header**: `Make2`                                                                                                            │
+│   552 +                                                                                                                                        │
+│   553 +  - **Definition**: Vehicle make (manufacturer) for the second vehicle involved in the incident. │
+│   554 +  - **Source Field**: `Make2` (RMS export)                                                                                              │
+│   555 +  - **Format**: Text string                                                                                                             │
+│   556 +  - **Validation Rules**: Same as `Make1`                                                                                               │
+│   557 +  - **Group**: Vehicle                                                                                                                  │
+│   558 +                                                                                                                                        │
+│   559 +  ---                                                                                                                                   │
+│   560 +                                                                                                                                        │
+│   561 +  ### Model2                                                                                                                            │
+│   562 +                                                                                                                                        │
+│   563 +  **Export Header**: `Model2`                                                                                                           │
+│   564 +                                                                                                                                        │
+│   565 +  - **Definition**: Vehicle model for the second vehicle involved in the incident. │
+│   566 +  - **Source Field**: `Model2` (RMS export)                                                                                             │
+│   567 +  - **Format**: Text string                                                                                                             │
+│   568 +  - **Validation Rules**: Same as `Model1`                                                                                              │
+│   569 +  - **Group**: Vehicle                                                                                                                  │
+│   570 +                                                                                                                                        │
+│   571 +  ---                                                                                                                                   │
+│   572 +                                                                                                                                        │
+│   573 +  ## 👮 Personnel Fields                                                                                                                │
+│   574 +                                                                                                                                        │
+│   575 +  ### OfficerOfRecord                                                                                                                   │
+│   576 +                                                                                                                                        │
+│   577 +  **Export Header**: `Officer of Record`                                                                                                │
+│   578 +                                                                                                                                        │
+│   579 +  - **Definition**: Primary officer assigned to the case in RMS. │
+│   580 +  - **Source Field**: `Officer of Record` (RMS export)                                                                                  │
+│   581 +  - **Format**: Text string                                                                                                             │
+│   582 +    - **Format Variations**: May include rank, badge number, or name variations                                                         │
+│   583 +    - **Examples**: `Officer John Smith`, `Ofc. J. Smith`, `Smith, John (Badge 123)`                                                    │
+│   584 +  - **Logic**: User-selected from officer roster or auto-populated from CAD assignment                                                  │
+│   585 +  - **Validation Rules**:                                                                                                               │
+│   586 +    - May be null (some cases may not have assigned officers, e.g., administrative reports)                                             │
+│   587 +    - Should match standardized officer naming convention                                                                               │
+│   588 +    - Recommend aligning to officer standardization lookup (e.g., `Assignment_Master_V2.csv`)                                           │
+│   589 +  - **Mapping Notes**:                                                                                                                  │
+│   590 +    - Backfills CAD `Officer` when CAD officer is null or blank                                                                         │
+│   591 +    - Used in **officer_temporal_match** strategy (weight: 0.5, normalized officer match)                                               │
+│   592 +    - Officer normalization recommended: remove titles/prefixes, normalize name order, case-insensitive                                 │
+│   593 +  - **Group**: Personnel                                                                                                                │
+│   594 +                                                                                                                                        │
+│   595 +  ---                                                                                                                                   │
+│   596 +                                                                                                                                        │
+│   597 +  ### Squad                                                                                                                             │
+│   598 +                                                                                                                                        │
+│   599 +  **Export Header**: `Squad`                                                                                                            │
+│   600 +                                                                                                                                        │
+│   601 +  - **Definition**: Squad/unit identifier for the assigned officer. │
+│   602 +  - **Source Field**: `Squad` (RMS export)                                                                                              │
+│   603 +  - **Format**: Text string or code                                                                                                     │
+│   604 +    - **Examples**: `A-Squad`, `B-Squad`, `Day Shift`, `Night Shift`, `Detective Bureau`                                                │
+│   605 +  - **Logic**: System-derived from officer assignment or user-selected                                                                  │
+│   606 +  - **Validation Rules**:                                                                                                               │
+│   607 +    - May be null                                                                                                                       │
+│   608 +    - Should match controlled squad/unit list if available                                                                              │
+│   609 +  - **Mapping Notes**:                                                                                                                  │
+│   610 +    - Used for squad-level analysis and reporting                                                                                       │
+│   611 +    - Can help identify squad-specific patterns or workload                                                                             │
+│   612 +  - **Group**: Personnel                                                                                                                │
+│   613 +                                                                                                                                        │
+│   614 +  ---                                                                                                                                   │
+│   615 +                                                                                                                                        │
+│   616 +  ### DetAssigned                                                                                                                       │
+│   617 +                                                                                                                                        │
+│   618 +  **Export Header**: `Det_Assigned`                                                                                                     │
+│   619 +                                                                                                                                        │
+│   620 +  - **Definition**: Detective identifier assigned to the case (if applicable for follow-up investigation). │
+│   621 +  - **Source Field**: `Det_Assigned` (RMS export)                                                                                       │
+│   622 +  - **Format**: Text string (same format as `OfficerOfRecord`)                                                                          │
+│   623 +  - **Logic**: User-selected from detective roster or assigned by supervisor                                                            │
+│   624 +  - **Validation Rules**:                                                                                                               │
+│   625 +    - May be null (not all cases require detective assignment, e.g., minor incidents)                                                   │
+│   626 +    - Should match standardized officer naming convention                                                                               │
+│   627 +  - **Mapping Notes**:                                                                                                                  │
+│   628 +    - Used for case assignment tracking and follow-up management                                                                        │
+│   629 +    - Indicates cases requiring investigative follow-up                                                                                 │
+│   630 +  - **Group**: Personnel                                                                                                                │
+│   631 +                                                                                                                                        │
+│   632 +  ---                                                                                                                                   │
+│   633 +                                                                                                                                        │
+│   634 +  ## 📂 Case Management Fields                                                                                                          │
+│   635 +                                                                                                                                        │
+│   636 +  ### ReviewedBy                                                                                                                        │
+│   637 +                                                                                                                                        │
+│   638 +  **Export Header**: `Reviewed By`                                                                                                      │
+│   639 +                                                                                                                                        │
+│   640 +  - **Definition**: Officer or supervisor identifier who reviewed the case report. │
+│   641 +  - **Source Field**: `Reviewed By` (RMS export)                                                                                        │
+│   642 +  - **Format**: Text string (same format as `OfficerOfRecord`)                                                                          │
+│   643 +  - **Logic**: Auto-populated when supervisor reviews/approves report                                                                   │
+│   644 +  - **Validation Rules**:                                                                                                               │
+│   645 +    - May be null (cases may not yet be reviewed or may not require review)                                                             │
+│   646 +    - Should match standardized officer naming convention (same as `OfficerOfRecord`)                                                   │
+│   647 +  - **Mapping Notes**:                                                                                                                  │
+│   648 +    - Used for quality assurance and approval tracking                                                                                  │
+│   649 +    - Indicates supervisory oversight                                                                                                   │
+│   650 +  - **Group**: Case Management                                                                                                          │
+│   651 +                                                                                                                                        │
+│   652 +  ---                                                                                                                                   │
+│   653 +                                                                                                                                        │
+│   654 +  ### CompleteCalc                                                                                                                      │
+│   655 +                                                                                                                                        │
+│   656 +  **Export Header**: `CompleteCalc`                                                                                                     │
+│   657 +                                                                                                                                        │
+│   658 +  - **Definition**: Boolean flag indicating whether the case is marked as complete. │
+│   659 +  - **Source Field**: `CompleteCalc` (RMS export)                                                                                       │
+│   660 +  - **Format**: Boolean or text                                                                                                         │
+│   661 +    - **Accepted Formats**:                                                                                                             │
+│   662 +      - Boolean (`true`/`false`)                                                                                                        │
+│   663 +      - Integer (`0`/`1`)                                                                                                               │
+│   664 +      - Text (`Y`/`N`, `Yes`/`No`, `Complete`/`Incomplete`)                                                                             │
+│   665 +  - **Logic**: System-calculated or user-toggled based on case completion criteria                                                      │
+│   666 +  - **Validation Rules**:                                                                                                               │
+│   667 +    - May be null (defaults to incomplete)                                                                                              │
+│   668 +    - If present, must be coercible to boolean                                                                                          │
+│   669 +  - **Mapping Notes**:                                                                                                                  │
+│   670 +    - Used for case completion tracking and reporting                                                                                   │
+│   671 +    - Helps identify incomplete or pending cases                                                                                        │
+│   672 +  - **Group**: Case Management                                                                                                          │
+│   673 +                                                                                                                                        │
+│   674 +  ---                                                                                                                                   │
+│   675 +                                                                                                                                        │
+│   676 +  ### CaseStatus                                                                                                                        │
+│   677 +                                                                                                                                        │
+│   678 +  **Export Header**: `Case_Status`                                                                                                      │
+│   679 +                                                                                                                                        │
+│   680 +  - **Definition**: Current status of the case in RMS workflow.

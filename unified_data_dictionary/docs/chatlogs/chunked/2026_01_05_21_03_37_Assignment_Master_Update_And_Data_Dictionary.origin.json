@@ -1,0 +1,47 @@
+{
+  "tags": [
+    "API",
+    "ai",
+    "code",
+    "config",
+    "conversation",
+    "data",
+    "docs",
+    "excel",
+    "function",
+    "input/output",
+    "json",
+    "legal",
+    "loop",
+    "markdown",
+    "police",
+    "python",
+    "regex",
+    "sql",
+    "training"
+  ],
+  "metadata_enrichment": {
+    "metadata": {
+      "project_name": "02_data",
+      "source_type": "documentation",
+      "language": "en",
+      "department": "admin",
+      "key_terms": [
+        "print",
+        "str",
+        "row",
+        "court_df",
+        "badge",
+        "strip"
+      ],
+      "enrichment_version": "1.0.0"
+    },
+    "summaries": {
+      "file_summary": "# Exported assignment data dictionary\n_Exported on 1/5/2026 at 21:02:10 EST from Cursor (2.3.21)_\n\n---\n\n**User**\n\nReview:\nC:\\Users\\carucci_r\\OneDrive - City of Hackensack\\09_Reference\\Personnel\\99_Archive\\personnel_merge_chatgpt.md\nC:\\Us...",
+      "first_line": "# Exported assignment data dictionary"
+    },
+    "enrichment_version": "1.0.0"
+  },
+  "last_processed_at": "2026-01-05T21:03:37.469268",
+  "department": "admin"
+}

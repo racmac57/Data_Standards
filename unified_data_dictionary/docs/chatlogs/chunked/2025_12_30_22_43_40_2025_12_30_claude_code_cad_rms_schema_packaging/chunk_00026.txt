@@ -1,0 +1,631 @@
+602 +  - **Source Field**: `Squad` (RMS export)
+       603 +  - **Format**: Text string or code
+       604 +    - **Examples**: `A-Squad`, `B-Squad`, `Day Shift`, `Night Shift`, `Detective Bureau`
+       605 +  - **Logic**: System-derived from officer assignment or user-selected
+       606 +  - **Validation Rules**:
+       607 +    - May be null
+       608 +    - Should match controlled squad/unit list if available
+       609 +  - **Mapping Notes**:
+       610 +    - Used for squad-level analysis and reporting
+       611 +    - Can help identify squad-specific patterns or workload
+       612 +  - **Group**: Personnel
+       613 +
+       614 +  ---
+       615 +
+       616 +  ### DetAssigned
+       617 +
+       618 +  **Export Header**: `Det_Assigned`
+       619 +
+       620 +  - **Definition**: Detective identifier assigned to the case (if applicable for follow-up investigation). 621 +  - **Source Field**: `Det_Assigned` (RMS export)
+       622 +  - **Format**: Text string (same format as `OfficerOfRecord`)
+       623 +  - **Logic**: User-selected from detective roster or assigned by supervisor
+       624 +  - **Validation Rules**:
+       625 +    - May be null (not all cases require detective assignment, e.g., minor incidents)
+       626 +    - Should match standardized officer naming convention
+       627 +  - **Mapping Notes**:
+       628 +    - Used for case assignment tracking and follow-up management
+       629 +    - Indicates cases requiring investigative follow-up
+       630 +  - **Group**: Personnel
+       631 +
+       632 +  ---
+       633 +
+       634 +  ## 📂 Case Management Fields
+       635 +
+       636 +  ### ReviewedBy
+       637 +
+       638 +  **Export Header**: `Reviewed By`
+       639 +
+       640 +  - **Definition**: Officer or supervisor identifier who reviewed the case report. 641 +  - **Source Field**: `Reviewed By` (RMS export)
+       642 +  - **Format**: Text string (same format as `OfficerOfRecord`)
+       643 +  - **Logic**: Auto-populated when supervisor reviews/approves report
+       644 +  - **Validation Rules**:
+       645 +    - May be null (cases may not yet be reviewed or may not require review)
+       646 +    - Should match standardized officer naming convention (same as `OfficerOfRecord`)
+       647 +  - **Mapping Notes**:
+       648 +    - Used for quality assurance and approval tracking
+       649 +    - Indicates supervisory oversight
+       650 +  - **Group**: Case Management
+       651 +
+       652 +  ---
+       653 +
+       654 +  ### CompleteCalc
+       655 +
+       656 +  **Export Header**: `CompleteCalc`
+       657 +
+       658 +  - **Definition**: Boolean flag indicating whether the case is marked as complete. 659 +  - **Source Field**: `CompleteCalc` (RMS export)
+       660 +  - **Format**: Boolean or text
+       661 +    - **Accepted Formats**:
+       662 +      - Boolean (`true`/`false`)
+       663 +      - Integer (`0`/`1`)
+       664 +      - Text (`Y`/`N`, `Yes`/`No`, `Complete`/`Incomplete`)
+       665 +  - **Logic**: System-calculated or user-toggled based on case completion criteria
+       666 +  - **Validation Rules**:
+       667 +    - May be null (defaults to incomplete)
+       668 +    - If present, must be coercible to boolean
+       669 +  - **Mapping Notes**:
+       670 +    - Used for case completion tracking and reporting
+       671 +    - Helps identify incomplete or pending cases
+       672 +  - **Group**: Case Management
+       673 +
+       674 +  ---
+       675 +
+       676 +  ### CaseStatus
+       677 +
+       678 +  **Export Header**: `Case_Status`
+       679 +
+       680 +  - **Definition**: Current status of the case in RMS workflow. 681 +  - **Source Field**: `Case_Status` (RMS export)
+       682 +  - **Format**: Text string
+       683 +    - **Expected Values** (to be confirmed from RMS reference):
+       684 +      - `Open`
+       685 +      - `Closed`
+       686 +      - `Pending`
+       687 +      - `Under Investigation`
+       688 +      - `Suspended`
+       689 +      - `Cleared by Arrest`
+       690 +      - `Cleared - Exceptional`
+       691 +      - `Unfounded`
+       692 +  - **Logic**: User-selected or system-derived based on case actions and outcomes
+       693 +  - **Validation Rules**:
+       694 +    - May be null
+       695 +    - Should match controlled vocabulary from RMS case status domain
+       696 +    - Recommend validation against official status code list
+       697 +  - **Mapping Notes**:
+       698 +    - Used for case lifecycle tracking and clearance analysis
+       699 +    - Critical for UCR/NIBRS reporting compliance
+       700 +  - **Group**: Case Management
+       701 +
+       702 +  ---
+       703 +
+       704 +  ## Multi-Column Matching Strategy Usage
+       705 +
+       706 +  The following table summarizes which RMS fields are used in each multi-column matching strategy:
+       707 +
+       708 +  | Strategy Name | RMS Fields Used | Confidence Threshold | Purpose |
+       709 +  |---------------|----------------|---------------------|---------|
+       710 +  | **Primary Key Match** | `CaseNumber` | 1.0 (100%) | Exact match on case number |
+       711 +  | **Temporal + Address Match** | `IncidentDate`, `IncidentTime`, `FullAddress` | 0.85 (85%) | Match on date/time + location |
+       712 +  | **Officer + Temporal Match** | `OfficerOfRecord`, `IncidentDate`, `IncidentTime` | 0.80 (80%) | Match on officer +
+           + date/time |
+       713 +  | **Address + Zone Match** | `FullAddress`, `Zone`, `IncidentDate` (optional) | 0.75 (75%) | Match on location + zone |
+       714 +
+       715 +  **Detailed Strategy Documentation**: See `multi_column_matching_strategy.md` for implementation details, scoring formulas,
+           + and workflow guidance. 716 +
+       717 +  ---
+       718 +
+       719 +  ## Data Quality Validation Rules Summary
+       720 +
+       721 +  | Field Group | Key Validation Rules |
+       722 +  |-------------|---------------------|
+       723 +  | **Temporal** | Incident date ≤ Report date; Date ranges logical; Times within 24-hour format |
+       724 +  | **Location** | Addresses contain commas; Zones in valid range (5-9); Grid codes match reference |
+       725 +  | **Incident Classification** | Types match controlled vocabulary; NIBRS codes valid |
+       726 +  | **Vehicle** | State codes valid (50 states + DC); Make-model combinations logical |
+       727 +  | **Property** | Values ≥ 0; Recovered ≤ Stolen |
+       728 +  | **Personnel** | Officer names standardized; Match officer roster |
+       729 +  | **Case Management** | Status values match controlled vocabulary; Complete flag valid boolean |
+       730 +
+       731 +  ---
+       732 +
+       733 +  ## Open Confirmations (To Finalize v1.0)
+       734 +
+       735 +  1. **Controlled Vocabularies**: Confirm canonical allowed domains for:
+       736 +     - `CaseStatus` (status values)
+       737 +     - `IncidentType1/2/3` (incident type codes/descriptions)
+       738 +     - `NIBRSClassification` (NIBRS code structure and valid values)
+       739 +     - `Grid` (grid codes)
+       740 +     - `Squad` (squad/unit codes)
+       741 +
+       742 +  2. **Supplemental Case Numbers**: Confirm whether supplementals can exceed `Z` (e.g., `AA`) or are limited to single-letter
+           + suffix (same as CAD). 743 +
+       744 +  3. **Timezone**: Confirm timezone for all temporal fields (recommend documenting as `America/New_York`). 745 +
+       746 +  4. **Vehicle Reference Data**: Provide controlled vocabulary lists for vehicle makes and models (if available). 747 +
+       748 +  5. **Temporal Alignment**: Confirm whether `IncidentDate`/`IncidentTime` should always match or be close to CAD `TimeofCall`
+           + for the same case number (data quality validation threshold). 749 +
+       750 +  6. **Narrative Structure**: Confirm if narrative has any standardized section headers or required fields (for automated
+           + extraction). 751 +
+       752 +  ---
+       753 +
+       754 +  ## Change Log
+       755 +
+       756 +  | Date | Version | Changes |
+       757 +  |------|---------|---------|
+       758 +  | 2025-12-30 | 1.0 | Initial comprehensive field definitions document with field grouping, enhanced validation rules, and
+           + multi-column matching integration |
+       759 +
+       760 +  ---
+       761 +
+       762 +  ## Related Documentation
+       763 +
+       764 +  - **CAD Field Definitions**: `CAD/DataDictionary/current/schema/cad_export_field_definitions.md`
+       765 +  - **CAD-to-RMS Mapping Schema**: `CAD_RMS/DataDictionary/current/schema/cad_to_rms_field_map.json`
+       766 +  - **RMS-to-CAD Mapping Schema**: `CAD_RMS/DataDictionary/current/schema/rms_to_cad_field_map.json`
+       767 +  - **Multi-Column Matching Strategy**: `multi_column_matching_strategy.md`
+       768 +  - **Schema Files Summary**: `SCHEMA_FILES_SUMMARY.md`
+
+● Perfect! I've successfully generated a comprehensive rms_export_field_definitions.md file with:
+
+  Key Features:
+
+  1. 29 RMS Fields Documented - All fields from your existing partial document, fully enhanced
+  2. Organized by 8 Functional Groups:
+    - Incident Identification
+    - Temporal Fields (6 fields)
+    - Incident Classification (4 fields)
+    - Location Fields (3 fields)
+    - Incident Details (Narrative with extraction hints)
+    - Property Fields (2 fields)
+    - Vehicle Fields (8 fields)
+    - Personnel Fields (3 fields)
+    - Case Management Fields (3 fields)
+  3. Each Field Entry Includes:
+    - Export Header and Standard Name
+    - Definition
+    - Source Field
+    - Format/Regex patterns with examples
+    - Logic explanation
+    - Validation Rules
+    - Mapping Notes (connection to CAD, matching strategies)
+    - Group classification
+  4. Special Enhancements:
+    - Narrative field includes extraction hints for suspect descriptions, vehicle info, property details, MO, and timestamps
+    - Multi-Column Matching Strategy Usage summary table
+    - Data Quality Validation Rules summary by group
+    - Column name mapping table with group classification
+    - Related documentation references
+
+  ---
+  Would you like me to update the supporting documentation files? I can update:
+
+  1. README.md - Add references to the new RMS field definitions
+  2. CHANGELOG.md - Document the creation/update of the comprehensive RMS field definitions
+  3. SUMMARY.md - Update the summary to reflect the enhanced documentation
+
+  Let me know if you'd like me to proceed with updating these files! > ● Perfect! I've successfully generated a comprehensive rms_export_field_definitions.md file with:
+
+  Key Features:
+
+  1. 29 RMS Fields Documented - All fields from your existing partial document, fully enhanced
+  2. Organized by 8 Functional Groups:
+    - Incident Identification
+    - Temporal Fields (6 fields)
+    - Incident Classification (4 fields)
+    - Location Fields (3 fields)
+    - Incident Details (Narrative with extraction hints)
+    - Property Fields (2 fields)
+    - Vehicle Fields (8 fields)
+    - Personnel Fields (3 fields)
+    - Case Management Fields (3 fields)
+  3. Each Field Entry Includes:
+    - Export Header and Standard Name
+    - Definition
+    - Source Field
+    - Format/Regex patterns with examples
+    - Logic explanation
+    - Validation Rules
+    - Mapping Notes (connection to CAD, matching strategies)
+    - Group classification
+  4. Special Enhancements:
+    - Narrative field includes extraction hints for suspect descriptions, vehicle info, property details, MO, and timestamps
+    - Multi-Column Matching Strategy Usage summary table
+    - Data Quality Validation Rules summary by group
+    - Column name mapping table with group classification
+    - Related documentation references
+
+  ---
+  Would you like me to update the supporting documentation files? I can update:
+
+  1. README.md - Add references to the new RMS field definitions
+  2. CHANGELOG.md - Document the creation/update of the comprehensive RMS field definitions
+  3. SUMMARY.md - Update the summary to reflect the enhanced documentation
+
+  Let me know if you'd like me to proceed with updating these files! ● Yes, let's proceed with updating the supporting documentation! I'll update all three files to reflect the comprehensive RMS field
+  definitions we just created. ● Read(README.md)
+  ⎿  Read 57 lines
+
+● Read(CHANGELOG.md)
+  ⎿  Read 30 lines
+
+● Read(SUMMARY.md)
+  ⎿  Read 32 lines
+
+● Now I'll update all three supporting documentation files:
+
+● Update(README.md)
+  ⎿  Error: Interrupted by user
+  ⎿  Interrupted · What should Claude do instead? > You’ve already generated the full rms_export_field_definitions.md file. Now, use the following instructions to update all supporting
+documentation files. 🛠️ Your Task
+
+Update the following documentation files to reflect the addition of the comprehensive RMS export schema. 📂 Files to Update
+
+README.md
+
+CHANGELOG.md
+
+SUMMARY.md
+
+✏️ Instructions by File
+1. ✅ README.md
+
+Add a new bullet or section under Data Exports, Schema Definitions, or similar:
+
+- **RMS Export Field Definitions** (`rms_export_field_definitions.md`)
+  Contains 29 documented fields grouped into 8 functional domains including Incident, Vehicle, Temporal, Narrative, and Case Management. Definitions include source mappings, format rules, validation, and CAD alignment notes. 2. ✅ CHANGELOG.md
+
+Add a new version entry like this at the top:
+
+## [v0.3.0] — 2025-12-30
+
+- Added `rms_export_field_definitions.md` with 29 RMS fields
+- Organized into 8 logical groups: Incident, Temporal, Classification, Location, Narrative, Vehicle, Personnel, and Case Management
+- Includes derived logic from `Narrative` field (e.g., suspect description, vehicle details, M.O.) - Integration with `rms_to_cad_field_map_v2_enhanced.json`
+- Summary of validation rules and matching strategy coverage
+
+3. ✅ SUMMARY.md
+
+Add a new item under “Schema Components” or “Recent Enhancements”:
+
+- 🚀 Added RMS field definitions (29 fields across 8 categories)
+  Includes narrative extraction logic, CAD mapping references, and validation strategy
+
+🧠 Output
+
+Return updated contents of:
+
+README.md
+
+CHANGELOG.md
+
+SUMMARY.md
+
+Maintain markdown formatting and file tone consistency. Claude: Once complete, you may offer to auto-insert references in any docs linking to rms_export_field_definitions.md where appropriate. ● I'll update all three supporting documentation files to reflect the comprehensive RMS field definitions. Let me proceed with the updates:
+
+● Update(README.md)
+  ⎿  Updated README.md with 1 addition
+       12    ### Documentation
+       13
+       14    - **`multi_column_matching_strategy.md`** - Comprehensive guide to multi-column matching strategies for confident record
+            linking
+       15 +  - **`rms_export_field_definitions.md`** - Comprehensive RMS field definitions with validation rules, formats, and mapping
+          + notes (29 fields across 8 functional groups)
+       16
+       17    ## Version 2.0 Enhancements
+       18
+
+● Update(README.md)
+  ⎿  Updated README.md with 3 additions and 3 removals
+       45
+       46    ## Related Documentation
+       47
+       48 -  - **CAD Field Definitions**: `../../CAD/DataDictionary/current/schema/cad_export_field_definitions.md`
+       49 -  - **RMS Field Definitions**: `../../RMS/DataDictionary/current/schema/rms_export_field_definitions.md`
+       50 -  - **Mapping Rules**: `../../../unified_data_dictionary/mappings/mapping_rules.md`
+       48 +  - **CAD Field Definitions**: `CAD/DataDictionary/current/schema/cad_export_field_definitions.md`
+       49 +  - **RMS Field Definitions**: `rms_export_field_definitions.md` (comprehensive v1.0 with 29 fields organized into 8 functional
+          + groups)
+       50 +  - **Mapping Rules**: `unified_data_dictionary/mappings/mapping_rules.md`
+       51
+       52    ## Schema Version History
+       53
+
+● Update(CHANGELOG.md)
+  ⎿  Updated CHANGELOG.md with 16 additions
+        2
+        3    All notable changes to this Standards folder (structure and key artifacts) will be documented here. 4
+        5 +  ## [v0.3.0] - 2025-12-30
+        6 +
+        7 +  ### Added
+        8 +  - **RMS Export Field Definitions** (`rms_export_field_definitions.md`)
+        9 +    - Comprehensive documentation of 29 RMS export fields
+       10 +    - Organized into 8 logical groups: Incident Identification, Temporal, Incident Classification, Location, Incident Details,
+          + Property, Vehicle, Personnel, and Case Management
+       11 +    - Each field includes: Export Header, Standard Name, Definition, Source Field, Format/Regex, Logic, Validation Rules,
+          + Mapping Notes, and Group classification
+       12 +    - Special narrative extraction logic for deriving suspect descriptions, vehicle details, property information, and modus
+          + operandi (M.O.) 13 +    - Multi-column matching strategy usage summary showing which RMS fields are used in each matching strategy
+       14 +    - Data quality validation rules summary organized by field group
+       15 +    - Integration references to `rms_to_cad_field_map_v2_enhanced.json` and `multi_column_matching_strategy.md`
+       16 +
+       17 +  ### Enhanced
+       18 +  - Updated `README.md` with reference to comprehensive RMS field definitions
+       19 +  - Updated `SUMMARY.md` to reflect new schema documentation
+       20 +
+       21    ## 2025-12-15
+       22
+       23    - Created CAD/RMS/CAD_RMS `DataDictionary/` scaffolding:
+
+● Update(SUMMARY.md)
+  ⎿  Updated SUMMARY.md with 3 additions
+        9        - `cad_export_field_definitions.md`
+       10    - **RMS**
+       11      - `RMS/DataDictionary/` scaffolding exists (schema/domains/defaults + archive/templates/scripts)
+       12 +    - `rms_export_field_definitions.md` - Comprehensive field definitions (29 fields, 8 groups)
+       13    - **Cross-system**
+       14      - `CAD_RMS/DataDictionary/current/schema/` contains:
+       15        - `cad_to_rms_field_map.json`
+       16        - `rms_to_cad_field_map.json`
+       17 +      - `multi_column_matching_strategy.md`
+       18 +      - `rms_export_field_definitions.md` (root-level comprehensive documentation)
+       19
+       20    ## Notes
+       21
+
+● Update(SUMMARY.md)
+  ⎿  Updated SUMMARY.md with 11 additions
+       32
+       33    - This folder is a local Git repo:
+       34      - `.git/` and `.gitignore` are present
+       35 +
+       36 +  ## Recent Enhancements
+       37 +
+       38 +  ### 🚀 RMS Field Definitions (v0.3.0 - 2025-12-30)
+       39 +  - **Added comprehensive RMS export schema documentation**
+       40 +    - 29 documented fields across 8 functional categories
+       41 +    - Groups: Incident Identification, Temporal, Incident Classification, Location, Incident Details, Property, Vehicle,
+          + Personnel, Case Management
+       42 +    - Each field includes validation rules, format patterns, CAD mapping references, and multi-column matching strategy usage
+       43 +    - Special narrative extraction logic for deriving suspect descriptions, vehicle details, property information, and M.O. 44 +    - Integrated with `rms_to_cad_field_map_v2_enhanced.json` and multi-column matching strategies
+       45 +    - Data quality validation rules summary organized by field group
+
+● Perfect! I've successfully updated all three supporting documentation files. Here's a summary of the changes:
+
+  ---
+  ✅ Updated Files Summary
+
+  1. README.md
+
+  Changes made:
+  - ✅ Added rms_export_field_definitions.md to the Documentation section with description
+  - ✅ Updated Related Documentation section to reference the comprehensive v1.0 RMS field definitions
+
+  New content:
+  ### Documentation
+  - **`rms_export_field_definitions.md`** - Comprehensive RMS field definitions with
+    validation rules, formats, and mapping notes (29 fields across 8 functional groups)
+
+  ## Related Documentation
+  - **RMS Field Definitions**: `rms_export_field_definitions.md` (comprehensive v1.0 with
+    29 fields organized into 8 functional groups)
+
+  ---
+  2. CHANGELOG.md
+
+  Changes made:
+  - ✅ Added new version entry [v0.3.0] - 2025-12-30 at the top
+  - ✅ Documented all features of the comprehensive RMS field definitions
+  - ✅ Noted enhancements to README.md and SUMMARY.md
+
+  New content:
+  ## [v0.3.0] - 2025-12-30
+
+  ### Added
+  - **RMS Export Field Definitions** (`rms_export_field_definitions.md`)
+    - Comprehensive documentation of 29 RMS export fields
+    - Organized into 8 logical groups
+    - Special narrative extraction logic
+    - Multi-column matching strategy usage summary
+    - Data quality validation rules summary
+    - Integration references to enhanced mapping schemas
+
+  ### Enhanced
+  - Updated README.md and SUMMARY.md
+
+  ---
+  3. SUMMARY.md
+
+  Changes made:
+  - ✅ Added RMS field definitions to the "What exists now" section
+  - ✅ Created new "Recent Enhancements" section with detailed feature breakdown
+  - ✅ Listed all 8 functional categories
+
+  New content:
+  - **RMS**
+    - `rms_export_field_definitions.md` - Comprehensive field definitions (29 fields, 8 groups)
+
+  ## Recent Enhancements
+
+  ### 🚀 RMS Field Definitions (v0.3.0 - 2025-12-30)
+  - Added comprehensive RMS export schema documentation
+  - 29 documented fields across 8 functional categories
+  - Special narrative extraction logic
+  - Integrated with mapping schemas and matching strategies
+
+  ---
+  📎 Additional Auto-Reference Opportunities
+
+  Would you like me to also update references in the following files to include the new comprehensive RMS field definitions? 1. SCHEMA_FILES_SUMMARY.md - Add entry for the root-level rms_export_field_definitions.md
+  2. multi_column_matching_strategy.md - Update the References section to point to the comprehensive v1.0 RMS field definitions
+  3. cad_to_rms_field_map.json and rms_to_cad_field_map.json - Add a schema-level comment or metadata field referencing the comprehensive
+  field definitions
+
+  Let me know if you'd like me to proceed with any of these additional updates! > You're doing great. Now apply the following optional documentation updates to complete full cross-referencing for the newly created
+rms_export_field_definitions.md. ✅ Update These Files:
+1. SCHEMA_FILES_SUMMARY.md
+
+Add this to the file’s field reference section or table:
+
+- `rms_export_field_definitions.md`: Comprehensive RMS schema documentation (29 fields, grouped, with validation and mapping logic)
+
+2. multi_column_matching_strategy.md
+
+In the “References” or final notes section, add:
+
+📄 For full definitions of the RMS fields used in fuzzy, temporal, and ID matching strategies, see:
+[`rms_export_field_definitions.md`](../rms_export_field_definitions.md)
+
+3. cad_to_rms_field_map_v2_enhanced.json
+4. rms_to_cad_field_map_v2_enhanced.json
+
+Add a top-level comment or metadata entry like:
+
+"_schema_reference": "See rms_export_field_definitions.md (v1.0 – 2025-12-30) for full field metadata, validation rules, and match logic"
+
+
+⚠️ Note: If the format doesn’t allow comments, use a "metadata" field at the top. 🧠 Output
+
+Return updated contents or diffs of all 4 files
+
+Ensure paths and links are relative and consistent with project structure
+
+● Perfect! I'll update all four files to complete the cross-referencing. Let me start by reading the current content of each file:
+
+● Read(SCHEMA_FILES_SUMMARY.md)
+  ⎿  Read 170 lines
+
+● Read(multi_column_matching_strategy.md)
+  ⎿  Read 50 lines
+
+● Read(multi_column_matching_strategy.md)
+  ⎿  Read 17 lines
+
+● Read(cad_to_rms_field_map.json)
+  ⎿  Read 30 lines
+
+● Read(rms_to_cad_field_map.json)
+  ⎿  Read 30 lines
+
+● Now I'll update all four files with the cross-references:
+
+● Update(SCHEMA_FILES_SUMMARY.md)
+  ⎿  Updated SCHEMA_FILES_SUMMARY.md with 6 additions and 4 removals
+       42
+       43    **Directory**: `RMS/DataDictionary/current/schema/`
+       44
+       45 -  - **`rms_export_field_definitions.md`**
+       46 -    - Comprehensive documentation of 29 RMS fields
+       47 -    - Field names, types, validation rules
+       48 -    - Usage in matching strategies
+       45 +  - **`rms_export_field_definitions.md`** (v1.0 - Root-level comprehensive documentation)
+       46 +    - Comprehensive RMS schema documentation (29 fields, grouped by 8 functional categories)
+       47 +    - Field names, types, formats, regex patterns, validation rules
+       48 +    - Mapping logic and CAD integration notes
+       49 +    - Multi-column matching strategy usage
+       50 +    - Narrative extraction hints for suspect descriptions, vehicle details, property info, and M.O. 51
+       52    - **`README.md`**
+       53      - Documentation for RMS schema directory
+
+● Update(SCHEMA_FILES_SUMMARY.md)
+  ⎿  Updated SCHEMA_FILES_SUMMARY.md with 3 additions and 3 removals
+       134
+       135    ### For Reference
+       136
+       137 -  - RMS field definitions: `RMS/DataDictionary/current/schema/rms_export_field_definitions.md`
+       138 -  - CAD field definitions: `CAD/DataDictionary/current/schema/cad_export_field_definitions.md`
+       139 -  - Matching strategy guide: `CAD_RMS/DataDictionary/current/schema/multi_column_matching_strategy.md`
+       137 +  - **RMS field definitions**: `rms_export_field_definitions.md` (v1.0 - Comprehensive with 29 fields, validation rules, and
+           + mapping logic)
+       138 +  - **CAD field definitions**: `CAD/DataDictionary/current/schema/cad_export_field_definitions.md`
+       139 +  - **Matching strategy guide**: `multi_column_matching_strategy.md`
+       140
+       141    ---
+       142
+
+● Update(multi_column_matching_strategy.md)
+  ⎿  Updated multi_column_matching_strategy.md with 13 additions and 1 removal
+       372    ## References
+       373
+       374    - `cad_export_field_definitions.md` - CAD field definitions
+       375 -  - `rms_export_field_definitions.md` - RMS field definitions
+       375 +  - `rms_export_field_definitions.md` - RMS field definitions (v1.0 - comprehensive)
+       376    - `cad_to_rms_field_map.json` - Mapping schema with matching strategies
+       377    - `rms_to_cad_field_map.json` - Reverse mapping schema
+       378
+       379    ---
+       380
+       381 +  📄 **For full definitions of the RMS fields used in fuzzy, temporal, and ID matching strategies, see:**
+       382 +  [`rms_export_field_definitions.md`](./rms_export_field_definitions.md)
+       383 +
+       384 +  This comprehensive document includes:
+       385 +  - All 29 RMS export fields organized into 8 functional groups
+       386 +  - Validation rules, format specifications, and regex patterns
+       387 +  - Multi-column matching strategy usage by field
+       388 +  - Narrative extraction logic for suspect descriptions, vehicle details, and M.O. 389 +  - CAD integration and backfill mapping notes
+       390 +
+       391 +  ---
+       392 +
+       393    ## Change Log
+       394
+       395    | Date | Version | Changes |
+
+● Now I'll update the two JSON mapping files to add the schema reference metadata:
+
+● Update(cad_to_rms_field_map.json)
+  ⎿  Updated cad_to_rms_field_map.json with 1 addition
+       1    {
+       2 +    "_schema_reference": "See rms_export_field_definitions.md (v1.0 - 2025-12-30) for full field metadata, validation rules, and
+         + match logic",
+       3      "schema_version": "2.0",
+       4      "generated_on": "2025-12-30",
+       5      "direction": "cad_to_rms",
+
+● Update(rms_to_cad_field_map.json)
+  ⎿  Updated rms_to_cad_field_map.json with 1 addition
+       1    {
+       2 +    "_schema_reference": "See rms_export_field_definitions.md (v1.0 - 2025-12-30) for full field metadata, validation rules, and
+         + match logic",
+       3      "schema_version": "2.0",
+       4      "generated_on": "2025-12-30",
+       5      "direction": "rms_to_cad",
+
+● Excellent! Let me verify the JSON files are still valid:
+
+● Bash(python -m json.tool "cad_to_rms_field_map.json" > /dev/null 2>&1 && echo "✓ cad_to_rms_field_map.json is valid JSON" || echo "✗
+      cad_to_rms_field_map.json has JS…)
+  ⎿  ✓ cad_to_rms_field_map.json is valid JSON
+
+● Bash(python -m json.tool "rms_to_cad_field_map.json" > /dev/null 2>&1 && echo "✓ rms_to_cad_field_map.json is valid JSON" || echo "✗
+      rms_to_cad_field_map.json has JS…)
+  ⎿  ✓ rms_to_cad_field_map.json is valid JSON
+
+● Perfect! All updates completed successfully and JSON files validated. Here's a comprehensive summary:
+
+  ---
+  ✅ All 4 Files Successfully Updated with Cross-References
+
+  1. SCHEMA_FILES_SUMMARY.md ✓
+
+  Changes:
+  - Enhanced RMS field definitions entry in "RMS Field Definitions" section
+  - Updated "For Reference" section with comprehensive details
+
+  Added content:
+  - **`rms_export_field_definitions.md`** (v1.0 - Root-level comprehensive documentation)
+    - Comprehensive RMS schema documentation (29 fields, grouped by 8 functional categories)
+    - Field names, types, formats, regex patterns, validation rules
+    - Mapping logic and CAD integration notes
+    - Multi-column matching strategy usage
+    - Narrative extraction hints for suspect descriptions, vehicle details, property info, and M.O. ---
+  2. multi_column_matching_strategy.md ✓
+
+  Changes:
+  - Enhanced References section with comprehensive RMS field definitions reference
+  - Added prominent call-out box with direct link and feature summary
+
+  Added content:
+  📄 **For full definitions of the RMS fields used in fuzzy, temporal, and ID matching strategies, see:**
+  [`rms_export_field_definitions.md`](./rms_export_field_definitions.md)
+
+  This comprehensive document includes:
+  - All 29 RMS export fields organized into 8 functional groups
+  - Validation rules, format specifications, and regex patterns
+  - Multi-column matching strategy usage by field
+  - Narrative extraction logic for suspect descriptions, vehicle details, and M.O.

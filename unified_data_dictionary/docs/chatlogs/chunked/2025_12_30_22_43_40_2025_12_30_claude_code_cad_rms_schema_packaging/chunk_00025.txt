@@ -1,0 +1,560 @@
+12 +
+        13 +  ---
+        14 +
+        15 +  ## Column Name Mapping (Export → Standard)
+        16 +
+        17 +  Some RMS export headers contain spaces; the "standard" name is what we use in mapping/schema work. 18 +
+        19 +  | Export Header | Standard Name | Group |
+        20 +  |--------------|---------------|-------|
+        21 +  | `Case Number` | `CaseNumber` | Incident |
+        22 +  | `Incident Date` | `IncidentDate` | Temporal |
+        23 +  | `Incident Time` | `IncidentTime` | Temporal |
+        24 +  | `Incident Date_Between` | `IncidentDateBetween` | Temporal |
+        25 +  | `Incident Time_Between` | `IncidentTimeBetween` | Temporal |
+        26 +  | `Report Date` | `ReportDate` | Temporal |
+        27 +  | `Report Time` | `ReportTime` | Temporal |
+        28 +  | `Incident Type_1` | `IncidentType1` | Incident Classification |
+        29 +  | `Incident Type_2` | `IncidentType2` | Incident Classification |
+        30 +  | `Incident Type_3` | `IncidentType3` | Incident Classification |
+        31 +  | `FullAddress` | `FullAddress` | Location |
+        32 +  | `Grid` | `Grid` | Location |
+        33 +  | `Zone` | `Zone` | Location |
+        34 +  | `Narrative` | `Narrative` | Incident Details |
+        35 +  | `Total Value Stolen` | `TotalValueStolen` | Property |
+        36 +  | `Total Value Recover` | `TotalValueRecover` | Property |
+        37 +  | `Registration 1` | `Registration1` | Vehicle |
+        38 +  | `Make1` | `Make1` | Vehicle |
+        39 +  | `Model1` | `Model1` | Vehicle |
+        40 +  | `Reg State 1` | `RegState1` | Vehicle |
+        41 +  | `Registration 2` | `Registration2` | Vehicle |
+        42 +  | `Reg State 2` | `RegState2` | Vehicle |
+        43 +  | `Make2` | `Make2` | Vehicle |
+        44 +  | `Model2` | `Model2` | Vehicle |
+        45 +  | `Reviewed By` | `ReviewedBy` | Case Management |
+        46 +  | `CompleteCalc` | `CompleteCalc` | Case Management |
+        47 +  | `Officer of Record` | `OfficerOfRecord` | Personnel |
+        48 +  | `Squad` | `Squad` | Personnel |
+        49 +  | `Det_Assigned` | `DetAssigned` | Personnel |
+        50 +  | `Case_Status` | `CaseStatus` | Case Management |
+        51 +  | `NIBRS Classification` | `NIBRSClassification` | Incident Classification |
+        52 +
+        53 +  ---
+        54 +
+        55 +  ## Field Definitions by Group
+        56 +
+        57 +  ---
+        58 +
+        59 +  ## 🔖 Incident Identification
+        60 +
+        61 +  ### CaseNumber
+        62 +
+        63 +  **Export Header**: `Case Number`
+        64 +
+        65 +  - **Definition**: RMS case identifier serving as the primary key and primary join key to CAD `ReportNumberNew`. 66 +  - **Source Field**: `Case Number` (RMS export)
+        67 +  - **Format**: `YY-NNNNNN` with optional supplemental suffix letter
+        68 +    - **Examples**: `25-000001`, `25-000001A`, `25-000001B`
+        69 +    - **Regex**: `^\d{2}-\d{6}([A-Z])?$`
+        70 +  - **Logic**:
+        71 +    - `YY` = last two digits of the year the case was created
+        72 +    - `NNNNNN` = sequential number starting at `000001` on January 1st each year
+        73 +    - **Supplementals**: same base number with a suffix letter starting at `A` (then `B`, `C`, etc.) 74 +  - **Validation Rules**:
+        75 +    - Must be non-null
+        76 +    - Must match the regex pattern
+        77 +    - Must be stored as text (not numeric) to preserve leading zeros
+        78 +    - Case-insensitive matching recommended (though typically uppercase)
+        79 +  - **Mapping Notes**:
+        80 +    - Primary join key to CAD `ReportNumberNew`
+        81 +    - Used in primary key matching strategy (confidence: 1.0)
+        82 +    - Normalized for matching: trim whitespace, collapse internal spaces, remove non-printable characters
+        83 +  - **Group**: Incident
+        84 +
+        85 +  ---
+        86 +
+        87 +  ## 📅 Temporal Fields
+        88 +
+        89 +  ### IncidentDate
+        90 +
+        91 +  **Export Header**: `Incident Date`
+        92 +
+        93 +  - **Definition**: Date when the incident occurred (not necessarily when it was reported). 94 +  - **Source Field**: `Incident Date` (RMS export)
+        95 +  - **Format**: Date type, exported as Excel date serial or `MM/dd/yyyy` format
+        96 +    - **Accepted Formats**:
+        97 +      - Excel date serial number
+        98 +      - `MM/dd/yyyy`
+        99 +      - `M/d/yyyy`
+       100 +      - ISO 8601 date (`YYYY-MM-DD`)
+       101 +  - **Logic**: User-entered or system-derived from incident details
+       102 +  - **Validation Rules**:
+       103 +    - May be null (incidents without confirmed dates)
+       104 +    - If present, must be a valid date
+       105 +    - Should be ≤ `ReportDate` (flag if incident date is after report date)
+       106 +    - Timezone: `America/New_York` (recommended documentation standard)
+       107 +  - **Mapping Notes**:
+       108 +    - Used in **temporal_address_match** strategy (weight: 0.4 for date component)
+       109 +    - Used in **officer_temporal_match** strategy (weight: 0.3 for date component)
+       110 +    - Used in **address_zone_match** strategy (weight: 0.2, optional)
+       111 +    - Can backfill CAD `TimeofCall` date component in validation workflows
+       112 +  - **Group**: Temporal
+       113 +
+       114 +  ---
+       115 +
+       116 +  ### IncidentTime
+       117 +
+       118 +  **Export Header**: `Incident Time`
+       119 +
+       120 +  - **Definition**: Time when the incident occurred (not necessarily when it was reported). 121 +  - **Source Field**: `Incident Time` (RMS export)
+       122 +  - **Format**: Time type, exported as Excel time serial or `HH:mm` format
+       123 +    - **Accepted Formats**:
+       124 +      - Excel time serial number
+       125 +      - `HH:mm`
+       126 +      - `H:mm`
+       127 +      - `HH:mm:ss`
+       128 +  - **Logic**: User-entered or system-derived from incident details
+       129 +  - **Validation Rules**:
+       130 +    - May be null
+       131 +    - If present, must be a valid time-of-day (00:00 to 23:59)
+       132 +    - Timezone: `America/New_York` (recommended documentation standard)
+       133 +  - **Mapping Notes**:
+       134 +    - Used in **temporal_address_match** strategy (weight: 0.3 with 1-hour tolerance)
+       135 +    - Used in **officer_temporal_match** strategy (weight: 0.2 with 2-hour tolerance)
+       136 +    - Combined with `IncidentDate` for temporal matching to CAD `TimeofCall`
+       137 +  - **Group**: Temporal
+       138 +
+       139 +  ---
+       140 +
+       141 +  ### IncidentDateBetween
+       142 +
+       143 +  **Export Header**: `Incident Date_Between`
+       144 +
+       145 +  - **Definition**: End date of a date range for incidents occurring "between" two dates. 146 +  - **Source Field**: `Incident Date_Between` (RMS export)
+       147 +  - **Format**: Date type (same formats as `IncidentDate`)
+       148 +  - **Logic**: User-entered for date range incidents (e.g., theft discovered between two dates)
+       149 +  - **Validation Rules**:
+       150 +    - May be null (most incidents are point-in-time)
+       151 +    - If present, should be ≥ `IncidentDate`
+       152 +    - Flag if date range exceeds reasonable threshold (e.g., > 30 days without justification)
+       153 +  - **Mapping Notes**:
+       154 +    - Not currently used in multi-column matching strategies
+       155 +    - Useful for incident analysis and reporting
+       156 +  - **Group**: Temporal
+       157 +
+       158 +  ---
+       159 +
+       160 +  ### IncidentTimeBetween
+       161 +
+       162 +  **Export Header**: `Incident Time_Between`
+       163 +
+       164 +  - **Definition**: End time of a time range for incidents occurring "between" two times. 165 +  - **Source Field**: `Incident Time_Between` (RMS export)
+       166 +  - **Format**: Time type (same formats as `IncidentTime`)
+       167 +  - **Logic**: User-entered for time range incidents
+       168 +  - **Validation Rules**:
+       169 +    - May be null (most incidents are point-in-time)
+       170 +    - If present and `IncidentDateBetween` matches `IncidentDate`, should be ≥ `IncidentTime`
+       171 +  - **Mapping Notes**:
+       172 +    - Not currently used in multi-column matching strategies
+       173 +    - Useful for incident analysis and reporting
+       174 +  - **Group**: Temporal
+       175 +
+       176 +  ---
+       177 +
+       178 +  ### ReportDate
+       179 +
+       180 +  **Export Header**: `Report Date`
+       181 +
+       182 +  - **Definition**: Date when the report was filed/created in RMS. 183 +  - **Source Field**: `Report Date` (RMS export)
+       184 +  - **Format**: Date type (same formats as `IncidentDate`)
+       185 +  - **Logic**: System-generated timestamp when report is created
+       186 +  - **Validation Rules**:
+       187 +    - May be null (rare)
+       188 +    - If both present, should be ≥ `IncidentDate`
+       189 +    - Flag if report date precedes incident date by unreasonable threshold (e.g., > 30 days)
+       190 +    - Timezone: `America/New_York` (recommended documentation standard)
+       191 +  - **Mapping Notes**:
+       192 +    - Used for data quality validation
+       193 +    - Can help identify delayed reporting patterns
+       194 +  - **Group**: Temporal
+       195 +
+       196 +  ---
+       197 +
+       198 +  ### ReportTime
+       199 +
+       200 +  **Export Header**: `Report Time`
+       201 +
+       202 +  - **Definition**: Time when the report was filed/created in RMS. 203 +  - **Source Field**: `Report Time` (RMS export)
+       204 +  - **Format**: Time type (same formats as `IncidentTime`)
+       205 +  - **Logic**: System-generated timestamp when report is created
+       206 +  - **Validation Rules**:
+       207 +    - May be null
+       208 +    - Timezone: `America/New_York` (recommended documentation standard)
+       209 +  - **Mapping Notes**:
+       210 +    - Used for data quality validation
+       211 +    - Combined with `ReportDate` provides full report creation timestamp
+       212 +  - **Group**: Temporal
+       213 +
+       214 +  ---
+       215 +
+       216 +  ## 🏷️ Incident Classification
+       217 +
+       218 +  ### IncidentType1
+       219 +
+       220 +  **Export Header**: `Incident Type_1`
+       221 +
+       222 +  - **Definition**: Primary incident type classification code or description. 223 +  - **Source Field**: `Incident Type_1` (RMS export)
+       224 +  - **Format**: Text string
+       225 +    - **Examples**: `THEFT`, `ASSAULT`, `BURGLARY`, `MOTOR VEHICLE THEFT`, `VANDALISM`
+       226 +  - **Logic**: User-selected from RMS incident type dropdown/lookup
+       227 +  - **Validation Rules**:
+       228 +    - May be null (though strongly recommended to populate)
+       229 +    - Should match controlled vocabulary from RMS incident type reference table
+       230 +    - Case-insensitive validation recommended
+       231 +  - **Mapping Notes**:
+       232 +    - **Priority 1** for backfilling CAD `Incident` field when CAD incident is null or blank
+       233 +    - Mapped to CAD `Incident` field
+       234 +    - Backfill condition: `update_when: cad_null_or_blank`, `accept_when: rms_not_null_or_blank`
+       235 +  - **Group**: Incident Classification
+       236 +
+       237 +  ---
+       238 +
+       239 +  ### IncidentType2
+       240 +
+       241 +  **Export Header**: `Incident Type_2`
+       242 +
+       243 +  - **Definition**: Secondary incident type classification (if multiple types apply to the same incident). 244 +  - **Source Field**: `Incident Type_2` (RMS export)
+       245 +  - **Format**: Text string (same format as `IncidentType1`)
+       246 +  - **Logic**: User-selected from RMS incident type dropdown/lookup
+       247 +  - **Validation Rules**:
+       248 +    - May be null
+       249 +    - Should match controlled vocabulary from RMS incident type reference table
+       250 +  - **Mapping Notes**:
+       251 +    - **Priority 2** for backfilling CAD `Incident` field (used if `IncidentType1` is null)
+       252 +    - Backfill order: `IncidentType1` → `IncidentType2` → `IncidentType3`
+       253 +  - **Group**: Incident Classification
+       254 +
+       255 +  ---
+       256 +
+       257 +  ### IncidentType3
+       258 +
+       259 +  **Export Header**: `Incident Type_3`
+       260 +
+       261 +  - **Definition**: Tertiary incident type classification (if multiple types apply to the same incident). 262 +  - **Source Field**: `Incident Type_3` (RMS export)
+       263 +  - **Format**: Text string (same format as `IncidentType1`)
+       264 +  - **Logic**: User-selected from RMS incident type dropdown/lookup
+       265 +  - **Validation Rules**:
+       266 +    - May be null
+       267 +    - Should match controlled vocabulary from RMS incident type reference table
+       268 +  - **Mapping Notes**:
+       269 +    - **Priority 3** for backfilling CAD `Incident` field (used if `IncidentType1` and `IncidentType2` are null)
+       270 +    - Backfill order: `IncidentType1` → `IncidentType2` → `IncidentType3`
+       271 +  - **Group**: Incident Classification
+       272 +
+       273 +  ---
+       274 +
+       275 +  ### NIBRSClassification
+       276 +
+       277 +  **Export Header**: `NIBRS Classification`
+       278 +
+       279 +  - **Definition**: NIBRS (National Incident-Based Reporting System) classification code for the incident. 280 +  - **Source Field**: `NIBRS Classification` (RMS export)
+       281 +  - **Format**: Text string
+       282 +    - **Examples**: `13A - Aggravated Assault`, `23F - Theft from Motor Vehicle`, `220 - Burglary/Breaking & Entering`
+       283 +  - **Logic**: System-derived or user-selected based on incident type and details
+       284 +  - **Validation Rules**:
+       285 +    - May be null (not all incidents have NIBRS classifications)
+       286 +    - If present, should match NIBRS code structure and valid code list
+       287 +    - Recommend validation against official NIBRS code reference
+       288 +  - **Mapping Notes**:
+       289 +    - Used for UCR/NIBRS reporting compliance
+       290 +    - Can be used for incident categorization in analysis workflows
+       291 +  - **Group**: Incident Classification
+       292 +
+       293 +  ---
+       294 +
+       295 +  ## 📍 Location Fields
+       296 +
+       297 +  ### FullAddress
+       298 +
+       299 +  **Export Header**: `FullAddress`
+       300 +
+       301 +  - **Definition**: Full incident location address string. 302 +  - **Source Field**: `FullAddress` (RMS export)
+       303 +  - **Format**: Text string containing comma-separated address components
+       304 +    - **Example Pattern**: `[ADDRESS-REDACTED], Hackensack, NJ 07601`
+       305 +    - **Components**: Street, City, State, ZIP
+       306 +  - **Logic**: User-entered or geocoded from address components
+       307 +  - **Validation Rules**:
+       308 +    - May be null (some incidents may not have specific addresses, e.g., city-wide alerts)
+       309 +    - If present, should contain at least one comma
+       310 +    - Recommend validation against geocoding service or master address list
+       311 +  - **Mapping Notes**:
+       312 +    - Backfills CAD `FullAddress2` when CAD address is null or blank
+       313 +    - Used in **temporal_address_match** strategy (weight: 0.3, fuzzy match threshold: 0.85)
+       314 +    - Used in **address_zone_match** strategy (weight: 0.5, fuzzy match threshold: 0.90)
+       315 +    - Address normalization recommended: lowercase, remove punctuation, normalize street suffixes
+       316 +  - **Group**: Location
+       317 +
+       318 +  ---
+       319 +
+       320 +  ### Grid
+       321 +
+       322 +  **Export Header**: `Grid`
+       323 +
+       324 +  - **Definition**: CAD grid / map grid identifier for the incident location. 325 +  - **Source Field**: `Grid` (RMS export)
+       326 +  - **Format**: Text string
+       327 +    - **Examples**: Grid codes vary by jurisdiction (to be defined from GIS/grid reference)
+       328 +  - **Logic**: System-derived from geocoded address or user-selected
+       329 +  - **Validation Rules**:
+       330 +    - May be null
+       331 +    - If present, should match controlled list of known grid codes (same domain as CAD `Grid`)
+       332 +  - **Mapping Notes**:
+       333 +    - Direct mapping to CAD `Grid` field
+       334 +    - Backfills CAD `Grid` when CAD grid is null or blank
+       335 +  - **Group**: Location
+       336 +
+       337 +  ---
+       338 +
+       339 +  ### Zone
+       340 +
+       341 +  **Export Header**: `Zone`
+       342 +
+       343 +  - **Definition**: Patrol/police zone code assigned to the incident location. 344 +  - **Source Field**: `Zone` (RMS export)
+       345 +  - **Format**: Integer or text (stored as string in current schema; observed as integer in analysis)
+       346 +    - **Observed Range**: `5`–`9` (integers only, consistent with CAD `PDZone`)
+       347 +  - **Logic**: System-derived from geocoded address or grid, or user-selected
+       348 +  - **Validation Rules**:
+       349 +    - May be null
+       350 +    - If present, must be an integer within valid zone domain (5-9)
+       351 +    - Should align with CAD `ZoneCalc`/`PDZone` domain
+       352 +  - **Mapping Notes**:
+       353 +    - Backfills CAD `PDZone` when CAD zone is null or blank (28.5% backfill rate observed in analysis)
+       354 +    - Used in **address_zone_match** strategy (weight: 0.3, exact match required)
+       355 +  - **Group**: Location
+       356 +
+       357 +  ---
+       358 +
+       359 +  ## 📝 Incident Details
+       360 +
+       361 +  ### Narrative
+       362 +
+       363 +  **Export Header**: `Narrative`
+       364 +
+       365 +  - **Definition**: Detailed narrative text describing the incident, actions taken by officers, witness statements, and case
+           + outcomes. 366 +  - **Source Field**: `Narrative` (RMS export)
+       367 +  - **Format**: Long-form text (may contain multiple paragraphs, newlines, special characters)
+       368 +    - **Example Structure**:
+       369 +      ```
+       370 +      On [DATE] at [TIME], officers responded to [LOCATION] for a report of [INCIDENT TYPE]. 371 +
+       372 +      Upon arrival, officers observed [OBSERVATIONS]. 373 +
+       374 +      Investigation revealed [FINDINGS]. 375 +
+       376 +      [SUSPECT/VICTIM] was identified as [DESCRIPTION]. 377 +
+       378 +      [PROPERTY] was recovered/stolen with an estimated value of [VALUE]. 379 +      ```
+       380 +  - **Logic**: User-entered narrative by reporting officer
+       381 +  - **Extraction Hints**:
+       382 +    - **Suspect Descriptions**: Look for keywords like "suspect", "male", "female", "white", "black", "hispanic", "height",
+           + "weight", "wearing"
+       383 +    - **Vehicle Descriptions**: Look for keywords like "vehicle", "car", "sedan", "SUV", "color", "make", "model", "plate",
+           + "registration"
+       384 +    - **Property Details**: Look for keywords like "stolen", "recovered", "value", "serial number", "item", "property"
+       385 +    - **MO (Modus Operandi)**: Look for keywords describing method of operation, entry points, tools used
+       386 +    - **Times/Dates**: Look for date/time patterns (e.g., `MM/DD/YYYY`, `HH:MM`, "approximately", "between")
+       387 +  - **Validation Rules**:
+       388 +    - May be null (some reports may not have narratives, though strongly recommended)
+       389 +    - If present, may contain unstructured text
+       390 +    - Recommend checking for minimum length (e.g., > 10 characters) to ensure meaningful content
+       391 +  - **Mapping Notes**:
+       392 +    - Can be used for fuzzy text matching when primary keys don't match (use with caution due to unstructured nature)
+       393 +    - Useful for extracting additional context for CAD integration (e.g., officer actions, outcomes)
+       394 +    - May contain information for derived fields (e.g., suspect vehicle description, property details)
+       395 +  - **Group**: Incident Details
+       396 +
+       397 +  ---
+       398 +
+       399 +  ## 💰 Property Fields
+       400 +
+       401 +  ### TotalValueStolen
+       402 +
+       403 +  **Export Header**: `Total Value Stolen`
+       404 +
+       405 +  - **Definition**: Total monetary value of stolen property in US dollars. 406 +  - **Source Field**: `Total Value Stolen` (RMS export)
+       407 +  - **Format**: Numeric (decimal)
+       408 +    - **Accepted Formats**:
+       409 +      - Numeric value (e.g., `1500.00`)
+       410 +      - Currency text with `$` and commas (e.g., `$1,500.00`)
+       411 +  - **Logic**: Sum of all stolen property item values entered in RMS
+       412 +  - **Validation Rules**:
+       413 +    - May be null (not all incidents involve theft or property loss)
+       414 +    - If present, must be ≥ 0
+       415 +    - Recommend flagging extremely high values (e.g., > $100,000) for manual review
+       416 +  - **Mapping Notes**:
+       417 +    - Used for property crime analysis
+       418 +    - Can help identify high-value theft patterns
+       419 +  - **Group**: Property
+       420 +
+       421 +  ---
+       422 +
+       423 +  ### TotalValueRecover
+       424 +
+       425 +  **Export Header**: `Total Value Recover`
+       426 +
+       427 +  - **Definition**: Total monetary value of recovered property in US dollars. 428 +  - **Source Field**: `Total Value Recover` (RMS export)
+       429 +  - **Format**: Numeric (decimal, same format as `TotalValueStolen`)
+       430 +  - **Logic**: Sum of all recovered property item values entered in RMS
+       431 +  - **Validation Rules**:
+       432 +    - May be null
+       433 +    - If present, must be ≥ 0
+       434 +    - Should be ≤ `TotalValueStolen` (flag if recovered exceeds stolen)
+       435 +  - **Mapping Notes**:
+       436 +    - Used for property recovery analysis and clearance rate calculations
+       437 +  - **Group**: Property
+       438 +
+       439 +  ---
+       440 +
+       441 +  ## 🚗 Vehicle Fields
+       442 +
+       443 +  ### Registration1
+       444 +
+       445 +  **Export Header**: `Registration 1`
+       446 +
+       447 +  - **Definition**: Vehicle registration/license plate number for the first vehicle involved in the incident. 448 +  - **Source Field**: `Registration 1` (RMS export)
+       449 +  - **Format**: Text string (format varies by state)
+       450 +    - **Examples**: `ABC123` (NJ), `ABC1234` (NY), `ABC-1234` (PA)
+       451 +  - **Logic**: User-entered from observation or DMV lookup
+       452 +  - **Validation Rules**:
+       453 +    - May be null (not all incidents involve vehicles)
+       454 +    - Format varies by `RegState1`
+       455 +    - Recommend validation against state-specific plate format patterns
+       456 +  - **Mapping Notes**:
+       457 +    - Used for vehicle identification and tracking
+       458 +    - Can be matched against stolen vehicle databases
+       459 +  - **Group**: Vehicle
+       460 +
+       461 +  ---
+       462 +
+       463 +  ### RegState1
+       464 +
+       465 +  **Export Header**: `Reg State 1`
+       466 +
+       467 +  - **Definition**: State abbreviation for the first vehicle registration. 468 +  - **Source Field**: `Reg State 1` (RMS export)
+       469 +  - **Format**: Two-letter US state abbreviation
+       470 +    - **Examples**: `NJ`, `NY`, `PA`, `CT`, `DE`
+       471 +  - **Logic**: User-selected from state dropdown
+       472 +  - **Validation Rules**:
+       473 +    - May be null
+       474 +    - If present, should be valid US state abbreviation (50 states + DC + territories)
+       475 +    - Recommend validation against official state code list
+       476 +  - **Mapping Notes**:
+       477 +    - Used to determine plate format validation rules for `Registration1`
+       478 +  - **Group**: Vehicle
+       479 +
+       480 +  ---
+       481 +
+       482 +  ### Make1
+       483 +
+       484 +  **Export Header**: `Make1`
+       485 +
+       486 +  - **Definition**: Vehicle make (manufacturer) for the first vehicle involved in the incident. 487 +  - **Source Field**: `Make1` (RMS export)
+       488 +  - **Format**: Text string
+       489 +    - **Examples**: `Ford`, `Toyota`, `Honda`, `Chevrolet`, `BMW`, `Mercedes-Benz`
+       490 +  - **Logic**: User-entered or selected from vehicle make lookup table
+       491 +  - **Validation Rules**:
+       492 +    - May be null
+       493 +    - Should match against known vehicle make list if available (e.g., NCIC vehicle make codes)
+       494 +    - Recommend standardizing capitalization and spelling
+       495 +  - **Mapping Notes**:
+       496 +    - Used for vehicle description and identification
+       497 +    - Can be used for pattern analysis (e.g., most stolen makes)
+       498 +  - **Group**: Vehicle
+       499 +
+       500 +  ---
+       501 +
+       502 +  ### Model1
+       503 +
+       504 +  **Export Header**: `Model1`
+       505 +
+       506 +  - **Definition**: Vehicle model for the first vehicle involved in the incident. 507 +  - **Source Field**: `Model1` (RMS export)
+       508 +  - **Format**: Text string
+       509 +    - **Examples**: `F-150`, `Camry`, `Civic`, `Silverado`, `3 Series`, `C-Class`
+       510 +  - **Logic**: User-entered or selected from vehicle model lookup table
+       511 +  - **Validation Rules**:
+       512 +    - May be null
+       513 +    - Should match against known vehicle model list if available
+       514 +    - Recommend validation against make-model combinations (e.g., Ford Camry is invalid)
+       515 +  - **Mapping Notes**:
+       516 +    - Used for vehicle description and identification
+       517 +    - Combined with `Make1` provides full vehicle description
+       518 +  - **Group**: Vehicle
+       519 +
+       520 +  ---
+       521 +
+       522 +  ### Registration2
+       523 +
+       524 +  **Export Header**: `Registration 2`
+       525 +
+       526 +  - **Definition**: Vehicle registration/license plate number for the second vehicle involved in the incident. 527 +  - **Source Field**: `Registration 2` (RMS export)
+       528 +  - **Format**: Text string (same format as `Registration1`)
+       529 +  - **Logic**: User-entered from observation or DMV lookup
+       530 +  - **Validation Rules**: Same as `Registration1`
+       531 +  - **Mapping Notes**:
+       532 +    - Used when multiple vehicles are involved (e.g., motor vehicle accidents, two-vehicle thefts)
+       533 +  - **Group**: Vehicle
+       534 +
+       535 +  ---
+       536 +
+       537 +  ### RegState2
+       538 +
+       539 +  **Export Header**: `Reg State 2`
+       540 +
+       541 +  - **Definition**: State abbreviation for the second vehicle registration. 542 +  - **Source Field**: `Reg State 2` (RMS export)
+       543 +  - **Format**: Two-letter US state abbreviation
+       544 +  - **Validation Rules**: Same as `RegState1`
+       545 +  - **Group**: Vehicle
+       546 +
+       547 +  ---
+       548 +
+       549 +  ### Make2
+       550 +
+       551 +  **Export Header**: `Make2`
+       552 +
+       553 +  - **Definition**: Vehicle make (manufacturer) for the second vehicle involved in the incident. 554 +  - **Source Field**: `Make2` (RMS export)
+       555 +  - **Format**: Text string
+       556 +  - **Validation Rules**: Same as `Make1`
+       557 +  - **Group**: Vehicle
+       558 +
+       559 +  ---
+       560 +
+       561 +  ### Model2
+       562 +
+       563 +  **Export Header**: `Model2`
+       564 +
+       565 +  - **Definition**: Vehicle model for the second vehicle involved in the incident. 566 +  - **Source Field**: `Model2` (RMS export)
+       567 +  - **Format**: Text string
+       568 +  - **Validation Rules**: Same as `Model1`
+       569 +  - **Group**: Vehicle
+       570 +
+       571 +  ---
+       572 +
+       573 +  ## 👮 Personnel Fields
+       574 +
+       575 +  ### OfficerOfRecord
+       576 +
+       577 +  **Export Header**: `Officer of Record`
+       578 +
+       579 +  - **Definition**: Primary officer assigned to the case in RMS. 580 +  - **Source Field**: `Officer of Record` (RMS export)
+       581 +  - **Format**: Text string
+       582 +    - **Format Variations**: May include rank, badge number, or name variations
+       583 +    - **Examples**: `Officer John Smith`, `Ofc. J. Smith`, `Smith, John (Badge 123)`
+       584 +  - **Logic**: User-selected from officer roster or auto-populated from CAD assignment
+       585 +  - **Validation Rules**:
+       586 +    - May be null (some cases may not have assigned officers, e.g., administrative reports)
+       587 +    - Should match standardized officer naming convention
+       588 +    - Recommend aligning to officer standardization lookup (e.g., `Assignment_Master_V2.csv`)
+       589 +  - **Mapping Notes**:
+       590 +    - Backfills CAD `Officer` when CAD officer is null or blank
+       591 +    - Used in **officer_temporal_match** strategy (weight: 0.5, normalized officer match)
+       592 +    - Officer normalization recommended: remove titles/prefixes, normalize name order, case-insensitive
+       593 +  - **Group**: Personnel
+       594 +
+       595 +  ---
+       596 +
+       597 +  ### Squad
+       598 +
+       599 +  **Export Header**: `Squad`
+       600 +
+       601 +  - **Definition**: Squad/unit identifier for the assigned officer.

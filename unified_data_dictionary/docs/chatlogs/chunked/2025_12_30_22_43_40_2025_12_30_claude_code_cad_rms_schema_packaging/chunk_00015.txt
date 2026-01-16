@@ -1,0 +1,205 @@
+│
+│   121 +  - **Source Field**: `Incident Time` (RMS export)                                                                                      │
+│   122 +  - **Format**: Time type, exported as Excel time serial or `HH:mm` format                                                              │
+│   123 +    - **Accepted Formats**:                                                                                                             │
+│   124 +      - Excel time serial number                                                                                                        │
+│   125 +      - `HH:mm`                                                                                                                         │
+│   126 +      - `H:mm`                                                                                                                          │
+│   127 +      - `HH:mm:ss`                                                                                                                      │
+│   128 +  - **Logic**: User-entered or system-derived from incident details                                                                     │
+│   129 +  - **Validation Rules**:                                                                                                               │
+│   130 +    - May be null                                                                                                                       │
+│   131 +    - If present, must be a valid time-of-day (00:00 to 23:59)                                                                          │
+│   132 +    - Timezone: `America/New_York` (recommended documentation standard)                                                                 │
+│   133 +  - **Mapping Notes**:                                                                                                                  │
+│   134 +    - Used in **temporal_address_match** strategy (weight: 0.3 with 1-hour tolerance)                                                   │
+│   135 +    - Used in **officer_temporal_match** strategy (weight: 0.2 with 2-hour tolerance)                                                   │
+│   136 +    - Combined with `IncidentDate` for temporal matching to CAD `TimeofCall`                                                            │
+│   137 +  - **Group**: Temporal                                                                                                                 │
+│   138 +                                                                                                                                        │
+│   139 +  ---                                                                                                                                   │
+│   140 +                                                                                                                                        │
+│   141 +  ### IncidentDateBetween                                                                                                               │
+│   142 +                                                                                                                                        │
+│   143 +  **Export Header**: `Incident Date_Between`                                                                                            │
+│   144 +                                                                                                                                        │
+│   145 +  - **Definition**: End date of a date range for incidents occurring "between" two dates. │
+│   146 +  - **Source Field**: `Incident Date_Between` (RMS export)                                                                              │
+│   147 +  - **Format**: Date type (same formats as `IncidentDate`)                                                                              │
+│   148 +  - **Logic**: User-entered for date range incidents (e.g., theft discovered between two dates)                                         │
+│   149 +  - **Validation Rules**:                                                                                                               │
+│   150 +    - May be null (most incidents are point-in-time)                                                                                    │
+│   151 +    - If present, should be ≥ `IncidentDate`                                                                                            │
+│   152 +    - Flag if date range exceeds reasonable threshold (e.g., > 30 days without justification)                                           │
+│   153 +  - **Mapping Notes**:                                                                                                                  │
+│   154 +    - Not currently used in multi-column matching strategies                                                                            │
+│   155 +    - Useful for incident analysis and reporting                                                                                        │
+│   156 +  - **Group**: Temporal                                                                                                                 │
+│   157 +                                                                                                                                        │
+│   158 +  ---                                                                                                                                   │
+│   159 +                                                                                                                                        │
+│   160 +  ### IncidentTimeBetween                                                                                                               │
+│   161 +                                                                                                                                        │
+│   162 +  **Export Header**: `Incident Time_Between`                                                                                            │
+│   163 +                                                                                                                                        │
+│   164 +  - **Definition**: End time of a time range for incidents occurring "between" two times. │
+│   165 +  - **Source Field**: `Incident Time_Between` (RMS export)                                                                              │
+│   166 +  - **Format**: Time type (same formats as `IncidentTime`)                                                                              │
+│   167 +  - **Logic**: User-entered for time range incidents                                                                                    │
+│   168 +  - **Validation Rules**:                                                                                                               │
+│   169 +    - May be null (most incidents are point-in-time)                                                                                    │
+│   170 +    - If present and `IncidentDateBetween` matches `IncidentDate`, should be ≥ `IncidentTime`                                           │
+│   171 +  - **Mapping Notes**:                                                                                                                  │
+│   172 +    - Not currently used in multi-column matching strategies                                                                            │
+│   173 +    - Useful for incident analysis and reporting                                                                                        │
+│   174 +  - **Group**: Temporal                                                                                                                 │
+│   175 +                                                                                                                                        │
+│   176 +  ---                                                                                                                                   │
+│   177 +                                                                                                                                        │
+│   178 +  ### ReportDate                                                                                                                        │
+│   179 +                                                                                                                                        │
+│   180 +  **Export Header**: `Report Date`                                                                                                      │
+│   181 +                                                                                                                                        │
+│   182 +  - **Definition**: Date when the report was filed/created in RMS. │
+│   183 +  - **Source Field**: `Report Date` (RMS export)                                                                                        │
+│   184 +  - **Format**: Date type (same formats as `IncidentDate`)                                                                              │
+│   185 +  - **Logic**: System-generated timestamp when report is created                                                                        │
+│   186 +  - **Validation Rules**:                                                                                                               │
+│   187 +    - May be null (rare)                                                                                                                │
+│   188 +    - If both present, should be ≥ `IncidentDate`                                                                                       │
+│   189 +    - Flag if report date precedes incident date by unreasonable threshold (e.g., > 30 days)                                            │
+│   190 +    - Timezone: `America/New_York` (recommended documentation standard)                                                                 │
+│   191 +  - **Mapping Notes**:                                                                                                                  │
+│   192 +    - Used for data quality validation                                                                                                  │
+│   193 +    - Can help identify delayed reporting patterns                                                                                      │
+│   194 +  - **Group**: Temporal                                                                                                                 │
+│   195 +                                                                                                                                        │
+│   196 +  ---                                                                                                                                   │
+│   197 +                                                                                                                                        │
+│   198 +  ### ReportTime                                                                                                                        │
+│   199 +                                                                                                                                        │
+│   200 +  **Export Header**: `Report Time`                                                                                                      │
+│   201 +                                                                                                                                        │
+│   202 +  - **Definition**: Time when the report was filed/created in RMS. │
+│   203 +  - **Source Field**: `Report Time` (RMS export)                                                                                        │
+│   204 +  - **Format**: Time type (same formats as `IncidentTime`)                                                                              │
+│   205 +  - **Logic**: System-generated timestamp when report is created                                                                        │
+│   206 +  - **Validation Rules**:                                                                                                               │
+│   207 +    - May be null                                                                                                                       │
+│   208 +    - Timezone: `America/New_York` (recommended documentation standard)                                                                 │
+│   209 +  - **Mapping Notes**:                                                                                                                  │
+│   210 +    - Used for data quality validation                                                                                                  │
+│   211 +    - Combined with `ReportDate` provides full report creation timestamp                                                                │
+│   212 +  - **Group**: Temporal                                                                                                                 │
+│   213 +                                                                                                                                        │
+│   214 +  ---                                                                                                                                   │
+│   215 +                                                                                                                                        │
+│   216 +  ## 🏷️ Incident Classification                                                                                                        │
+│   217 +                                                                                                                                        │
+│   218 +  ### IncidentType1                                                                                                                     │
+│   219 +                                                                                                                                        │
+│   220 +  **Export Header**: `Incident Type_1`                                                                                                  │
+│   221 +                                                                                                                                        │
+│   222 +  - **Definition**: Primary incident type classification code or description. │
+│   223 +  - **Source Field**: `Incident Type_1` (RMS export)                                                                                    │
+│   224 +  - **Format**: Text string                                                                                                             │
+│   225 +    - **Examples**: `THEFT`, `ASSAULT`, `BURGLARY`, `MOTOR VEHICLE THEFT`, `VANDALISM`                                                  │
+│   226 +  - **Logic**: User-selected from RMS incident type dropdown/lookup                                                                     │
+│   227 +  - **Validation Rules**:                                                                                                               │
+│   228 +    - May be null (though strongly recommended to populate)                                                                             │
+│   229 +    - Should match controlled vocabulary from RMS incident type reference table                                                         │
+│   230 +    - Case-insensitive validation recommended                                                                                           │
+│   231 +  - **Mapping Notes**:                                                                                                                  │
+│   232 +    - **Priority 1** for backfilling CAD `Incident` field when CAD incident is null or blank                                            │
+│   233 +    - Mapped to CAD `Incident` field                                                                                                    │
+│   234 +    - Backfill condition: `update_when: cad_null_or_blank`, `accept_when: rms_not_null_or_blank`                                        │
+│   235 +  - **Group**: Incident Classification                                                                                                  │
+│   236 +                                                                                                                                        │
+│   237 +  ---                                                                                                                                   │
+│   238 +                                                                                                                                        │
+│   239 +  ### IncidentType2                                                                                                                     │
+│   240 +                                                                                                                                        │
+│   241 +  **Export Header**: `Incident Type_2`                                                                                                  │
+│   242 +                                                                                                                                        │
+│   243 +  - **Definition**: Secondary incident type classification (if multiple types apply to the same incident). │
+│   244 +  - **Source Field**: `Incident Type_2` (RMS export)                                                                                    │
+│   245 +  - **Format**: Text string (same format as `IncidentType1`)                                                                            │
+│   246 +  - **Logic**: User-selected from RMS incident type dropdown/lookup                                                                     │
+│   247 +  - **Validation Rules**:                                                                                                               │
+│   248 +    - May be null                                                                                                                       │
+│   249 +    - Should match controlled vocabulary from RMS incident type reference table                                                         │
+│   250 +  - **Mapping Notes**:                                                                                                                  │
+│   251 +    - **Priority 2** for backfilling CAD `Incident` field (used if `IncidentType1` is null)                                             │
+│   252 +    - Backfill order: `IncidentType1` → `IncidentType2` → `IncidentType3`                                                               │
+│   253 +  - **Group**: Incident Classification                                                                                                  │
+│   254 +                                                                                                                                        │
+│   255 +  ---                                                                                                                                   │
+│   256 +                                                                                                                                        │
+│   257 +  ### IncidentType3                                                                                                                     │
+│   258 +                                                                                                                                        │
+│   259 +  **Export Header**: `Incident Type_3`                                                                                                  │
+│   260 +                                                                                                                                        │
+│   261 +  - **Definition**: Tertiary incident type classification (if multiple types apply to the same incident). │
+│   262 +  - **Source Field**: `Incident Type_3` (RMS export)                                                                                    │
+│   263 +  - **Format**: Text string (same format as `IncidentType1`)                                                                            │
+│   264 +  - **Logic**: User-selected from RMS incident type dropdown/lookup                                                                     │
+│   265 +  - **Validation Rules**:                                                                                                               │
+│   266 +    - May be null                                                                                                                       │
+│   267 +    - Should match controlled vocabulary from RMS incident type reference table                                                         │
+│   268 +  - **Mapping Notes**:                                                                                                                  │
+│   269 +    - **Priority 3** for backfilling CAD `Incident` field (used if `IncidentType1` and `IncidentType2` are null)                        │
+│   270 +    - Backfill order: `IncidentType1` → `IncidentType2` → `IncidentType3`                                                               │
+│   271 +  - **Group**: Incident Classification                                                                                                  │
+│   272 +                                                                                                                                        │
+│   273 +  ---                                                                                                                                   │
+│   274 +                                                                                                                                        │
+│   275 +  ### NIBRSClassification                                                                                                               │
+│   276 +                                                                                                                                        │
+│   277 +  **Export Header**: `NIBRS Classification`                                                                                             │
+│   278 +                                                                                                                                        │
+│   279 +  - **Definition**: NIBRS (National Incident-Based Reporting System) classification code for the incident. │
+│   280 +  - **Source Field**: `NIBRS Classification` (RMS export)                                                                               │
+│   281 +  - **Format**: Text string                                                                                                             │
+│   282 +    - **Examples**: `13A - Aggravated Assault`, `23F - Theft from Motor Vehicle`, `220 - Burglary/Breaking & Entering`                  │
+│   283 +  - **Logic**: System-derived or user-selected based on incident type and details                                                       │
+│   284 +  - **Validation Rules**:                                                                                                               │
+│   285 +    - May be null (not all incidents have NIBRS classifications)                                                                        │
+│   286 +    - If present, should match NIBRS code structure and valid code list                                                                 │
+│   287 +    - Recommend validation against official NIBRS code reference                                                                        │
+│   288 +  - **Mapping Notes**:                                                                                                                  │
+│   289 +    - Used for UCR/NIBRS reporting compliance                                                                                           │
+│   290 +    - Can be used for incident categorization in analysis workflows                                                                     │
+│   291 +  - **Group**: Incident Classification                                                                                                  │
+│   292 +                                                                                                                                        │
+│   293 +  ---                                                                                                                                   │
+│   294 +                                                                                                                                        │
+│   295 +  ## 📍 Location Fields                                                                                                                 │
+│   296 +                                                                                                                                        │
+│   297 +  ### FullAddress                                                                                                                       │
+│   298 +                                                                                                                                        │
+│   299 +  **Export Header**: `FullAddress`                                                                                                      │
+│   300 +                                                                                                                                        │
+│   301 +  - **Definition**: Full incident location address string. │
+│   302 +  - **Source Field**: `FullAddress` (RMS export)                                                                                        │
+│   303 +  - **Format**: Text string containing comma-separated address components                                                               │
+│   304 +    - **Example Pattern**: `[ADDRESS-REDACTED], Hackensack, NJ 07601`                                                                      │
+│   305 +    - **Components**: Street, City, State, ZIP                                                                                          │
+│   306 +  - **Logic**: User-entered or geocoded from address components                                                                         │
+│   307 +  - **Validation Rules**:                                                                                                               │
+│   308 +    - May be null (some incidents may not have specific addresses, e.g., city-wide alerts)                                              │
+│   309 +    - If present, should contain at least one comma                                                                                     │
+│   310 +    - Recommend validation against geocoding service or master address list                                                             │
+│   311 +  - **Mapping Notes**:                                                                                                                  │
+│   312 +    - Backfills CAD `FullAddress2` when CAD address is null or blank                                                                    │
+│   313 +    - Used in **temporal_address_match** strategy (weight: 0.3, fuzzy match threshold: 0.85)                                            │
+│   314 +    - Used in **address_zone_match** strategy (weight: 0.5, fuzzy match threshold: 0.90)                                                │
+│   315 +    - Address normalization recommended: lowercase, remove punctuation, normalize street suffixes                                       │
+│   316 +  - **Group**: Location                                                                                                                 │
+│   317 +                                                                                                                                        │
+│   318 +  ---                                                                                                                                   │
+│   319 +                                                                                                                                        │
+│   320 +  ### Grid                                                                                                                              │
+│   321 +                                                                                                                                        │
+│   322 +  **Export Header**: `Grid`                                                                                                             │
+│   323 +                                                                                                                                        │
+│   324 +  - **Definition**: CAD grid / map grid identifier for the incident location.

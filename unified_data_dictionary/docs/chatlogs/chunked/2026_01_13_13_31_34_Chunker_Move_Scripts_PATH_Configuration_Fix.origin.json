@@ -1,0 +1,42 @@
+{
+  "tags": [
+    "ai",
+    "ai-chat",
+    "code",
+    "conversation",
+    "data",
+    "docs",
+    "excel",
+    "it-ops",
+    "json",
+    "markdown",
+    "police",
+    "powershell",
+    "python",
+    "sql"
+  ],
+  "metadata_enrichment": {
+    "metadata": {
+      "project_name": "02_data",
+      "source_type": "documentation",
+      "language": "en",
+      "department": "admin",
+      "key_terms": [
+        "files",
+        "file",
+        "path",
+        "json",
+        "name",
+        "processing"
+      ],
+      "enrichment_version": "1.0.0"
+    },
+    "summaries": {
+      "file_summary": "# Help with watcher_splitter error\n_Exported on 1/13/2026 at 13:30:24 EST from Cursor (2.3.34)_\n\n---\n\n**User**\n\nI have this repo on  my laptop and the file sent to the KB is a folder with the chunks in txt, and the combined file in both...",
+      "first_line": "# Help with watcher_splitter error"
+    },
+    "enrichment_version": "1.0.0"
+  },
+  "last_processed_at": "2026-01-13T13:31:34.182772",
+  "department": "admin"
+}

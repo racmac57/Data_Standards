@@ -1,0 +1,75 @@
+{
+  "source_file": "Pull_GitHub_Repository_Updates_And_Verify_Paths.md",
+  "source_path": "C:\\_chunker\\02_data\\Pull_GitHub_Repository_Updates_And_Verify_Paths.md",
+  "manifest_path": "C:\\Users\\carucci_r\\OneDrive - City of Hackensack\\KB_Shared\\04_output\\2025_12_21_18_58_49_Pull_GitHub_Repository_Updates_And_Verify_Paths\\2025_12_21_18_58_49_Pull_GitHub_Repository_Updates_And_Verify_Paths.origin.json",
+  "created_at": "2025_12_21_18_58_49",
+  "tags": [
+    "RAG",
+    "automation",
+    "config",
+    "data cleaning",
+    "docs",
+    "input/output",
+    "markdown",
+    "police",
+    "schema",
+    "sql",
+    "workflow"
+  ],
+  "metadata": {
+    "project_name": "02_data",
+    "source_type": "documentation",
+    "language": "en",
+    "department": "admin",
+    "key_terms": [
+      "git",
+      "onedrive",
+      "checking",
+      "users",
+      "carucci_r",
+      "city"
+    ],
+    "enrichment_version": "1.0.0"
+  },
+  "summaries": {
+    "file_summary": "# CAD Data Cleaning Engine updates\n_Exported on 12/21/2025 at 18:58:25 EST from Cursor (2.2.43)_\n\n---\n\n**User**\n\nhttps://github.com/racmac57/CAD_Data_Cleaning_Engine.git pull the updates to the linked guthub repo\n\n---\n\n**Cursor**\n\n\nCheck...",
+    "first_line": "# CAD Data Cleaning Engine updates"
+  },
+  "chunks": [
+    {
+      "chunk_id": "2025-12-21T18:58:49+00:00_Pull_GitHub_Repository_Updates_And_Verify_Paths_chunk1",
+      "chunk_index": 1,
+      "file": "chunk_00000.txt",
+      "tags": [
+        "automation",
+        "carucci_r",
+        "checking",
+        "city",
+        "config",
+        "data cleaning",
+        "docs",
+        "input/output",
+        "markdown",
+        "onedrive",
+        "police",
+        "rag",
+        "schema",
+        "sql",
+        "users",
+        "workflow"
+      ],
+      "key_terms": [
+        "git",
+        "onedrive",
+        "checking",
+        "users",
+        "carucci_r",
+        "city"
+      ],
+      "summary": "# CAD Data Cleaning Engine updates\n_Exported on 12/21/2025 at 18:58:25 EST from Cursor (2.2.43)_\n\n---\n\n**User**\n\nhttps://github.com/racmac57/CAD_Data_Cleaning_Engine.git pull the updates to the linked guthub repo\n\n---\n\n**Cursor**\n\n\nCheck...",
+      "char_length": 5600,
+      "byte_length": 5771
+    }
+  ],
+  "enrichment_version": "1.0.0"
+}

@@ -1,0 +1,376 @@
+## Version 2.1.2 - 2025-10-27 - Critical Loop Fix & Performance Optimization
+
+### 🚨 Critical Fixes
+- **Processing Loop Resolution**: Fixed infinite processing loops by ensuring failed files are moved to archive
+- **File Archive Management**: Unreadable files → `03_archive/failed/`, too-short files → `03_archive/skipped/`, no-chunk files → `03_archive/no_chunks/`
+- **Database Locking**: Resolved frequent "database is locked" errors with batch operations
+- **File Stability**: Reduced stability check times (1s min, 15s max) for faster processing
+
+### ⚡ Performance Enhancements
+- **Dynamic Parallel Workers**: Up to 12 workers for large batches (50+ files), 8 for smaller batches
+- **Batch Processing**: Process large file sets in configurable batches with delays to prevent system overload
+- **Optimized Database Operations**: Batch logging reduces database locking and improves throughput
+- **Enhanced Monitoring**: Real-time performance metrics including files/minute, avg processing time, peak CPU/memory
+
+### 🔧 Technical Improvements
+- **Source Folder Copying**: Configurable copying of processed chunks/transcripts back to source folders
+- **Enhanced Error Handling**: Comprehensive error logging with automatic file archiving
+- **Speed Optimizations**: Reduced file stability checks, faster database operations, improved parallel processing
+- **Production Stability**: System now handles 500+ files efficiently without loops or crashes
+
+### 📁 Updated Files
+- `watcher_splitter.py` - Loop fix, performance enhancements, source copying, batch operations
+- `config.json` - Added performance settings (parallel_workers, batch_size, database_batch_size)
+- `CHANGELOG.md` - Version 2.1.2 documentation
+
+### 🎯 Performance Results
+**✅ MASSIVE PERFORMANCE IMPROVEMENT**:
+- ✅ **No more processing loops** - Files properly archived when failed
+- ✅ **8-12x faster processing** - Dynamic parallel workers and batch operations
+- ✅ **Database stability** - Batch logging eliminates locking issues
+- ✅ **500+ file capability** - System now handles large volumes efficiently
+- ✅ **Real-time monitoring** - Enhanced performance metrics and tracking
+
+## Version 2.1.1 - 2025-10-27 - Production Hardening
+
+### 🔒 Security Enhancements
+- **Flower Authentication**: Added basic auth with environment variable support
+- **Credential Management**: Secure password generation with production warnings
+- **Access Control**: Protected monitoring dashboard from unauthorized access
+
+### 🚀 Reliability Improvements
+- **Redis Fallback**: Automatic fallback to multiprocessing.Queue if Redis unavailable
+- **Priority Processing**: High-priority queues for legal/police departments (priority=9)
+- **Enhanced Error Handling**: Comprehensive Redis failure detection and recovery
+- **Task Timeout Management**: Improved timeout handling with graceful degradation
+
+### 🧪 Testing & Monitoring
+- **Extended Test Coverage**: Added Redis failure, high-volume, timeout, and priority tests
+- **Edge Case Validation**: Comprehensive testing of production scenarios
+- **Health Monitoring**: Enhanced health checks with fallback detection
+- **Production Readiness**: All critical gaps addressed
+
+### 📁 Updated Files
+- `orchestrator.py` - Redis fallback, Flower authentication
+- `celery_tasks.py` - Priority task processing, enhanced routing
+- `test_celery_integration.py` - Extended test coverage for edge cases
+- `README.md` - Security features, priority queues, environment variables
+- `CHANGELOG.md` - Version 2.1.1 documentation
+
+### 🎯 Production Status
+**✅ PRODUCTION READY** - All identified gaps addressed:
+- ✅ Redis dependency management with fallback
+- ✅ Flower security with authentication
+- ✅ Task prioritization for urgent departments
+- ✅ Comprehensive edge case testing
+- ✅ Enhanced monitoring and health checks
+
+## Version 2.1.0 - 2025-10-27 - Celery Integration
+
+### 🚀 New Features
+- **Celery Task Queue Integration**: Advanced async processing with Redis broker
+- **Task Chains**: Process → RAG → Evaluate workflow with automatic retries
+- **Flower Dashboard**: Web-based monitoring at http://localhost:5555
+- **Enhanced Orchestrator**: Automated service management with health checks
+- **Graceful Fallback**: System continues working if Celery/Redis unavailable
+- **Rate Limiting**: Configurable task rate limits (10/m processing, 20/m RAG)
+- **Task Timeouts**: 300s hard limit, 240s soft limit with retries
+- **Health Monitoring**: Automated health checks every minute
+
+### 🔧 Enhancements
+- **Advanced Error Handling**: Network failure retries (3 attempts)
+- **Task Routing**: Separate queues for processing, RAG, evaluation, monitoring
+- **Comprehensive Logging**: Task start/completion/failure tracking
+- **Backward Compatibility**: Existing functionality preserved
+- **Configuration**: Celery settings in config.json
+
+### 📁 New Files
+- `celery_tasks.py` - Task definitions and chains
+- `enhanced_watchdog.py` - Celery-integrated file monitoring
+- `orchestrator.py` - Service orchestration with Flower dashboard
+- `advanced_celery_config.py` - Advanced Celery configuration
+
+### 🔄 Updated Files
+- `watcher_splitter.py` - Celery integration with fallback
+- `config.json` - Added Celery configuration options
+- `requirements_rag.txt` - Added celery, redis, flower dependencies
+- `README.md` - Celery usage instructions and monitoring guide
+
+## [Version 1.2.1] - 2025-10-27 - Enhanced RAG Implementation
+
+### Fixed
+- **Redundant file opens**: Fixed processors to use passed text instead of reopening files
+- **Encoding handling**: Changed from 'ignore' to 'replace' for better data preservation
+- **NLTK import issues**: Added proper stopwords handling with fallback
+- **LangSmith integration**: Cleaned up unused imports and improved error handling
+
+### Enhanced
+- **Modular file processors**: Created `file_processors.py` module for better organization
+- **Security redaction**: Added PII redaction for sensitive data in RAG chunks
+- **Config validation**: Added startup validation for configuration parameters
+- **Error handling**: Improved graceful degradation when RAG components unavailable
+- **Performance**: Better memory handling for large files
+
+### Added
+- **Automated testing**: `rag_test.py` for comprehensive RAG evaluation
+- **Type hints**: Added type annotations throughout RAG modules
+- **Comprehensive docstrings**: Improved documentation for all functions
+- **Dependency checking**: Runtime checks for file processor dependencies
+- **RAG query examples**: Added usage examples to README
+
+### Technical Improvements
+- **File processing**: Streamlined file reading with appropriate processors
+- **Error recovery**: Better error handling without breaking main processing
+- **Code organization**: Separated concerns into dedicated modules
+- **Testing framework**: Automated test suite with threshold validation
+- **Documentation**: Enhanced examples and usage instructions
+
+## [Version 1.2.0] - 2025-10-27 - RAG Integration Complete
+
+### Added
+- **RAG Integration**: Comprehensive retrieval-augmented generation system with ChromaDB
+- **Vector Database**: ChromaDB integration for semantic search and knowledge base management
+- **Faithfulness Scoring**: Advanced evaluation of answer grounding in source context
+- **Expanded File Type Support**: Added processors for .xlsx, .pdf, .py, .docx, .sql, .yaml, .xml, .log
+- **RAG Evaluation Metrics**: Precision@K, Recall@K, MRR, nDCG, ROUGE, BLEU scores
+- **LangSmith Integration**: Tracing, feedback collection, and quality assurance capabilities
+- **Hybrid Search**: Combined semantic and keyword-based retrieval
+- **Advanced Metadata Extraction**: Enhanced metadata for all file types including formulas, imports, docstrings
+
+### Implementation Files
+- `rag_integration.py`: ChromaDB RAG system with faithfulness scoring
+- `rag_evaluation.py`: Comprehensive evaluation metrics and pipeline
+- `rag_search.py`: Interactive search interface and command-line tool
+- `install_rag_dependencies.py`: Automated dependency installation script
+- `test_queries.json`: Test queries for evaluation
+- `GROK_IMPLEMENTATION_GUIDE.md`: Complete guide for Grok implementation
+- Updated `config.json` with RAG and LangSmith configuration
+- Updated `requirements.txt` with all necessary dependencies
+- Updated `watcher_splitter.py` with RAG integration and file type processors
+- Updated `README.md` with RAG usage documentation
+
+### Technical Details
+- Integrated ChromaDB vector database with automatic chunk indexing
+- Added file type processors for Excel, PDF, Python, Word, YAML, XML, SQL, and log files
+- Implemented faithfulness scoring using sentence transformers
+- Added comprehensive RAG evaluation metrics (retrieval and generation)
+- Created interactive search interface with command-line support
+- Added automated dependency installation script
+- Integrated RAG processing into existing watcher pipeline
+
+### Usage
+- Enable RAG: Set `"rag_enabled": true` in config.json
+- Install dependencies: `python install_rag_dependencies.py`
+- Search knowledge base: `python rag_search.py`
+- Process files: `python watcher_splitter.py` (automatically adds to ChromaDB)
+
+## [Version 1.1.0] - 2025-10-27
+
+### Added
+- **Timestamp-prefixed output folders**: Output folders now include `YYYY_MM_DD_HH_MM_SS_` prefix for better chronological organization
+- **Enhanced file organization**: Processed files are now organized by processing timestamp, making it easier to track when files were processed
+- **Robust chunking logging**: Added detailed logging for chunking operations including text length, sentence count, chunk parameters, and processing statistics
+- **Directory cleanup and organization**: Moved old scripts to archive, organized documentation in 99_doc folder
+
+### Fixed
+- **Critical Fix**: Resolved Unicode filename processing issues that prevented files with special characters (emojis, symbols) from being processed correctly
+- **Enhanced filename sanitization**: Improved regex-based cleaning to handle problematic characters while preserving readable filenames
+- **Unicode encoding errors**: Fixed console logging issues with special characters that caused processing failures
+- **Directory creation failures**: Resolved "No such file or directory" errors when creating output folders for files with special characters
+- **Windows path length limits**: Fixed directory name length issues by reducing filename limit to 50 characters to account for timestamp prefixes
+
+### Technical Details
+- Added enhanced filename sanitization using regex pattern `[^\w\s-]` to remove special characters
+- Implemented safe filename logging with ASCII encoding fallback to prevent console encoding errors
+- Added filename length limits (100 characters) to prevent Windows path length issues
+- Improved error handling for directory creation and file writing operations
+
+### Impact
+- Files with emojis, special symbols, and Unicode characters now process successfully
+- Eliminated processing failures that previously required manual filename changes
+- Improved system reliability for diverse file naming conventions
+- Maintained backward compatibility with existing filename formats
+
+## [Previous Versions]
+
+### Initial Release
+- Enterprise-grade chunker with database tracking
+- Parallel processing capabilities
+- Department-specific configurations
+- Comprehensive logging and monitoring
+- Automatic file archiving and organization
+
+```
+
+```markdown
+# Enterprise Chunker v2.1.9 - Project Summary
+
+## Overview
+
+Enterprise Chunker is a production-ready file processing system with RAG (Retrieval-Augmented Generation) capabilities. It processes diverse file types, extracts chunks, generates transcripts, and maintains a searchable knowledge base using the ChromaDB vector database. ## Key Directories
+
+- **`02_data/`** - Watch folder for input files
+- **`03_archive/`** - Archived original files (MOVE-based workflow)
+- **`04_output/`** - Processed chunks and transcripts organized by source file
+- **`05_logs/`** - Application logs and processing history
+- **`06_config/`** - Configuration files (config.json)
+- **`chroma_db/`** - ChromaDB vector database storage
+- **`99_doc/`** - Documentation and legacy snapshots
+
+## Entry Points
+
+- **`watcher_splitter.py`** - Main file processing watcher
+- **`backfill_knowledge_base.py`** - Backfill script for existing chunks (v2.1.6 optimized)
+- **`rag_search.py`** - Interactive knowledge base search
+- **`gui_app.py`** - Streamlit GUI for search, browsing results, and stats
+- **`manual_process_files.py`** - Manual file processing tool
+- **`verify_chunk_completeness.py`** - Verification script for backfill validation
+
+## Changes in v2.1.9 (2025-11-18)
+
+- **Performance Improvements**: Batch processing (100 files per cycle), stability skip for old files (>10 minutes), and enhanced parallel processing options dramatically reduce processing time for large backlogs (6,500 files: 3.5 hours → 53 minutes). - **Archive Reprocessing**: New `reprocess_output.py` script enables reprocessing of archived files with enhanced tagging and domain-aware department detection. - **OneDrive Migration**: `migrate_to_onedrive.py` safely migrates local archives to OneDrive with conflict resolution and Windows MAX_PATH handling. - **Department Refactoring**: 20 domain-specific departments (python, cad, claude, data-cleaning, fire, ems, etc.) with tailored configurations and priority settings. Fire and EMS departments added with high-priority processing and enhanced redaction for sensitive incident/patient data. - **Auto-Archival**: Optional weekly archival of old output sessions (>90 days) to `03_archive/consolidated/YYYY/MM/`. - **Long Path Handling**: Automatic path shortening for Windows MAX_PATH limits (>240 characters). - **Version Conflict Resolution**: Automatic `_v2`, `_v3` suffix handling for sidecars and manifests. ## Changes in v2.1.9 (2025-11-19)
+
+- **Failed File Analysis**: New `analyze_failed_files.py` script provides comprehensive analysis of failed files by file type, size, time patterns, and reprocessing potential. Identifies which files are good candidates for reprocessing (supported types, reasonable size, recent failures). - **OneDrive Failed Directory**: Updated `config.json` and `watcher_splitter.py` to use OneDrive path for failed directory (`%OneDriveCommercial%\\KB_Shared\\03_archive\\failed`) for consistency with archive and output directories. - **Environment Variable Expansion**: Enhanced `load_cfg()` function to expand environment variables for `failed_dir` configuration, ensuring proper path resolution. ## Changes in v2.1.9 (2025-11-20)
+
+- **Failed File Tracker**: Added `failed_file_tracker.py` with SQLite backend to track failed files, classify failure types (e.g. encrypted PDF, corrupt file, invalid chunk), enforce capped retries with exponential backoff, and provide CLI stats/JSON exports. - **Batch Reprocessing Orchestration**: Added `batch_reprocess_failed.py` to safely requeue retryable failures from `03_archive/failed` into `source/` in batches, with categorization (retryable vs permanent chunk vs tracker-permanent) and detailed JSON stats (`05_logs/batch_reprocess_stats.json`). - **Reprocessing Run Plan**: Documented a full reprocessing workflow in `REPROCESSING_RUN_PLAN.md` for draining historical failures and validating OneDrive outputs. - **Reprocessing Metrics**: Enhanced `reprocess_output.py` with per-extension success/fail/skip metrics and JSON reporting (`05_logs/reprocess_stats.json`) to measure reprocessing effectiveness. - **Enhanced PDF/Excel/SLX Support**: Improved `file_processors.py` and `watcher_splitter.py` for PDF (page markers, metadata extraction, encrypted PDF handling) and SLX (larger per-file XML content limits with safety caps), ensuring better RAG context and stability. ## Changes in v2.1.9 (2025-11-21)
+
+- **Desktop/Laptop Synchronization**: Enhanced cross-machine workflow support:
+  - Archive management scripts for moving files between desktop and laptop via OneDrive KB_Shared
+  - Duplicate detection utilities to prevent duplicate processing when both machines process files
+  - Archive file analysis and migration tools for consolidating processed files
+- **Log Rotation Fix**: Fixed `PermissionError` crash when log file is locked by another process (Windows). Watcher now handles locked log files gracefully without crashing. - **Extended File Type Support**: Added `.yaml` and `.docx` to supported file extensions in `config.json`, bringing total supported file types to 16. All processors already existed in `file_processors.py` - just needed configuration update. - **Output Format Enhancement**: Transcript files now generated in both `.md` and `.json` formats:
+  - Markdown format with headers and formatted content
+  - JSON format with structured metadata and chunk information
+- **Timestamp Format**: Output folders use consistent `YYYY_MM_dd_HH_MM_SS_[File_Name]` format with explicit documentation
+
+## Changes in v2.1.9 (2025-12-04)
+
+- **Critical PATH Fix**: Fixed batch files to use absolute path to PowerShell 7 (`C:\Program Files\PowerShell\7\pwsh.exe`) instead of relying on system PATH
+  - Prevents window closing instantly when `pwsh.exe` is not in PATH
+  - Added fallback to standard PowerShell if PowerShell 7 not found
+  - Both Directory Opus (`Chunker_Move.bat`) and Send To menu (`Chunker_MoveOptimized.bat`) batch files now work reliably
+- **Directory Opus Button Configuration**: Documented correct settings:
+  - Type: `Standard Function` (not `MS-DOS Batch Function`)
+  - Command: `@nodeselect "C:\_chunker\opus\Chunker_Move.bat" {allfilepath}`
+  - Argument syntax: `{allfilepath}` (no `$` suffix)
+- **Enhanced Debugging**: Added comprehensive debug output and transcript logging to capture errors even if window closes
+
+## Changes in v2.1.9 (2025-12-02)
+
+- **Directory Opus Integration**: Added button integration for Directory Opus file manager:
+  - `C:\_chunker\opus\Chunker_Move.bat` - Batch file configured as Directory Opus button
+  - Moves selected files to `02_data` watch folder via `Chunker_MoveOptimized.ps1`
+  - Configured with proper argument passing (`{allfilepath}`) and modifiers
+- **Watcher Script Improvements**: Enhanced watcher startup and shutdown scripts:
+  - `Start-Watcher.bat` - Silent operation, error detection, process verification, detailed logging
+  - `Stop-Watcher.ps1` - Fixed variable conflict (`$pid` → `$watcherPid`) preventing execution errors
+- **Multicore Processing**: Enabled true multiprocessing in `config.json`:
+  - `use_multiprocessing: true` - Enables CPU-bound parallel processing across multiple cores
+  - Expected 100%+ performance improvement similar to laptop performance gains
+- **Database Optimizations**: Improved database handling for multiprocessing:
+  - `database_batch_size: 50` (increased from 10) - Reduces write frequency
+  - Enhanced retry logic with exponential backoff (1s, 2s, 4s, 5s max)
+  - Increased retries from 3 to 5 attempts for better lock handling
+
+## Changes in v2.1.9 (2025-11-23)
+
+- **Expanded File Type Support**: Added `.yaml` and `.docx` to supported file extensions in `config.json`, bringing total supported file types to 15. Processors for these file types already existed in `file_processors.py` but were not enabled in the watcher configuration. Files with these extensions will now be automatically processed by the watcher. ## Changes in v2.1.8
+
+- Upgraded to `chromadb 1.3.4`, rebuilt the collection, and re-ran the backfill so 2,907 enriched chunks reflect the latest pipeline. - Hardened `deduplication.py` and `rag_integration.py` with `hnswlib` compatibility shims, enabling successful auto-remove runs. - Added and validated `scripts/release_commit_and_tag.bat`, documenting the workflow and recording the 2025-11-07 dry run plus live execution in `docs/RELEASE_WORKFLOW.md`. - Replaced placeholder modules with comprehensive pytest suites (52 tests) for query caching, incremental updates, backup manager, and monitoring to match production behavior. - **Watcher Stability Hardening (2025-11-07)**: Skips manifest/archived/output files, sanitises output folder names, replaces Unicode logging arrows, and adds safe archive moves to prevent recursion and WinError 206 failures. - **SQLite Robustness (2025-11-07)**: Extended connection timeout, layered exponential-backoff retries for department stats, and reduced "database is locked" noise during concurrent processing. ## Recent Improvements (Post-v2.1.8)
+
+### Tiny File Handling
+- **Automatic Archiving**: Files under 100 bytes (empty files, placeholders, "No measures found" messages) are now automatically moved to `03_archive/skipped_files/` along with their manifests. - **Cleaner Logs**: Changed from repeated WARNING messages to single INFO message on archive, reducing log spam. - **Preserved Files**: Tiny files are preserved in archive for review rather than left in watch folder or deleted. ### Chunk Writer & Manifest Hardening
+- **Single Directory Pass**: Consolidated `write_chunk_files()` builds the parent folder once, writes each chunk with UTF-8 safety, and logs failures without halting the batch. - **Manifest Copies**: `copy_manifest_sidecar()` now always prepares the destination path before cloning manifests, preventing `FileNotFoundError` in fresh OneDrive hierarchies. - **Manifest Hygiene**: Watcher ignores any filename containing `.origin.json`, and automatically re-hashes content when manifests arrive without stored checksums so incremental tracking stays accurate. ### Database Lock Monitoring
+- **Monitoring Documentation**: Created `MONITOR_DB_LOCKS.md` with real-time monitoring commands, hourly error counts, and pattern analysis scripts. - **Alert Thresholds**: Established baseline at 1.5 errors/minute (68% reduction from previous), alert threshold at 3 errors/minute (2x baseline). - **24-48 Hour Review Schedule**: Structured monitoring plan to identify time-based clustering, processing volume correlation, and sustained error periods. - **Error Analysis**: Identified that 92% of lock errors occur in `log_processing()` (lacks retry wrapper) vs 8% in `_update_department_stats()` (has 5-retry backoff). - **Error Log Retries**: `chunker_db.log_error` supports both legacy and streamlined call signatures while retrying writes with exponential backoff and a 60 s SQLite timeout, dramatically reducing `database is locked` noise. ### Queue & Metrics Optimizations
+- **Tokenizer Cache**: Sentence tokenization uses an LRU cache so repeat documents avoid redundant NLTK calls. - **Background Metrics**: System metrics run on a dedicated executor and notification bursts are rate-limited (once every 60 s per key) to keep the main watcher loop responsive. - **Queue Handling**: Optional `multiprocessing.Pool` batches (configurable) accelerate heavy backlogs, while the `processed_files` set auto-clears past 1,000 entries to prevent lookup bloat. ### Extended File-Type Support
+- **Excel & Office**: `.xlsx`, `.xls`, `.xlsm`, and `.docx` are parsed via dedicated processors, extracting sheets, formulas, and key workbook metadata before feeding into the chunker. - **PDF**: `.pdf` files are processed via `process_pdf_file`, which adds page markers, extracts basic metadata, and handles encrypted documents gracefully. - **Simulink**: `.slx` models are treated as ZIP archives and scanned for XML/MDL members, with 50 KB per-file and 100 MB total caps to prevent runaway reads. - **Config Alignment**: `config.json`’s `supported_extensions` now mirrors these capabilities so both laptop and desktop watchers process the same richer set of file types. ### SQLite Reliability
+- **Centralized Connection Helper**: `_conn()` applies 60 s timeouts and WAL pragmas across the module, and `get_connection()` delegates to it for consistency. - **Integrity Check**: `run_integrity_check()` runs at startup, logging anomalies before work begins. ### Testing & Collection Guardrails
+- **Legacy Skip Hook**: Root `conftest.py` skips `99_doc/legacy` collections to keep pytest runs focused on active suites. - **DB Smoke Test**: `tests/test_db.py` exercises the new retry logic, ensuring locked inserts surface immediately during CI. ### Windows Console Encoding
+- **UTF-8 Shell Setup**: Documented `chcp 65001` and `PYTHONIOENCODING=utf-8` steps so emoji-rich filenames no longer trigger Unicode logging errors on Windows watchers. ### Archive & Output Organisation
+- `03_archive/` - Successfully processed files
+- `03_archive/skipped_files/` - Files too small to process (< 100 bytes)
+- Output folders pre-create manifest and chunk directories, avoiding empty `03_archive/failed` fallbacks. ## Prior Highlights (v2.1.6)
+
+- **Multiprocessing Backfill**: Parallel processing with 4-8 workers for 20x performance improvement
+- **Optimized ChromaDB Inserts**: Separate connections per process for concurrent batch operations
+- **HNSW Vector Index**: Tuned parameters (M=32, ef_construction=512, ef_search=200) for large datasets
+- **Comprehensive Verification**: Validation tools ensure all chunks from all folders are processed
+- **CPU & Memory Monitoring**: Real-time resource tracking with saturation alerts
+- **Duplicate Prevention**: Pre-insertion checks prevent duplicate chunks in knowledge base
+- **Batch Optimization**: Configurable batch sizes (500-1000) optimized for ChromaDB performance
+
+## Technology Stack
+
+- **Python 3.13** - Core runtime
+- **ChromaDB 1.3.4** - Vector database for RAG
+- **NLTK** - Natural language processing and keyword extraction
+- **psutil** - System resource monitoring
+- **tqdm** - Progress tracking
+- **multiprocessing** - Parallel processing support
+
+## Configuration
+
+Key settings in `config.json`:
+- `rag_enabled`: true (enables RAG functionality)
+- `backfill_batch_size`: 750 (optimized batch size)
+- `backfill_multiprocessing`: true (enables parallel processing)
+- `backfill_num_workers`: null (auto-detects 4-8 workers)
+- `chroma_persist_dir`: "./chroma_db" (vector database location)
+
+## Performance
+
+- **Backfill Throughput**: 100-200 chunks/second (with multiprocessing)
+- **Processing Time**: 2-3 minutes for 3,200 chunks
+- **Memory Usage**: Optimized with batch processing and disk persistence
+- **CPU Utilization**: Efficient multi-core usage with parallel workers
+
+## Documentation
+
+- **CHANGELOG.md** - Detailed version history and changes
+- **README.md** - Comprehensive usage and feature documentation
+- **SUMMARY.md** - This file (project overview and key points)
+
+
+```
+
+```markdown
+# Chunker_v2 - Enterprise RAG-Powered File Processing System
+
+**Version 2.1.9** - Performance improvements for large backlogs, enhanced reprocessing and failed-file handling, OneDrive migration support, and expanded file type processing (PDF/XLSX/SLX/YAML/DOCX). Now supports 16 file types with desktop/laptop synchronization improvements. ## What's New in v2.1.9+
+
+### Chunker Move Scripts & PATH Fixes (2025-12-04)
+- **Critical PATH Fix**: Fixed batch files to use absolute path to PowerShell 7 (`C:\Program Files\PowerShell\7\pwsh.exe`) instead of relying on system PATH
+  - Prevents window closing instantly when `pwsh.exe` is not in PATH
+  - Added automatic fallback to standard Windows PowerShell if PowerShell 7 not found
+  - Both Directory Opus and Send To menu batch files now work reliably regardless of PATH configuration
+- **Enhanced Debugging**: Added comprehensive debug output and transcript logging to capture errors even if window closes
+- **Directory Opus Button Configuration**: Documented correct settings (Type: `Standard Function`, Argument: `{allfilepath}`, Command includes `@nodeselect` modifier)
+
+### Directory Opus Integration & Multicore Processing (2025-12-02)
+- **Directory Opus Button Integration**: Added `C:\_chunker\opus\Chunker_Move.bat` for seamless file processing from Directory Opus file manager
+  - Configured as Standard Function button with `{allfilepath}` argument passing
+  - Moves selected files directly to `02_data` watch folder for automatic processing
+  - Window display configured for visibility during operations
+- **Watcher Startup Improvements**: Enhanced `C:\_chunker\scripts\Start-Watcher.bat` with:
+  - Silent operation (no window flash) using `-WindowStyle Hidden`
+  - Comprehensive error detection and reporting
+  - Automatic verification that watcher process actually started
+  - Detailed logging to `logs\watcher_start.log` for troubleshooting
+  - Full path validation for all prerequisites
+- **Stop Watcher Fix**: Fixed `C:\_chunker\scripts\Stop-Watcher.ps1` variable conflict (`$pid` → `$watcherPid`) preventing PowerShell execution errors
+- **Multicore Processing Enabled**: Set `use_multiprocessing: true` in `config.json` for true CPU-bound parallel processing across multiple cores
+  - Expected 100%+ performance improvement on CPU-intensive workloads
+  - Automatic fallback to sequential processing on errors
+- **Database Performance Improvements**:
+  - Increased `database_batch_size` from 10 to 50 to reduce write frequency
+  - Enhanced retry logic in `chunker_db.py` with exponential backoff (1s, 2s, 4s, 5s max)
+  - Increased retries from 3 to 5 attempts for better lock handling
+  - Reduced "database is locked" errors during multiprocessing operations
+
+### Desktop/Laptop Synchronization & Extended File Types (2025-11-21)
+- **Cross-Machine Archive Management**: New utilities for managing files across desktop and laptop:
+  - `move_archive_to_kb_location.py` - Move archive files to KB_Shared for cross-machine access
+  - `archive_file_management.py` - Analyze and manage archive files with recommendations
+  - `find_and_move_archive_outputs.py` - Find output folders with duplicate detection
+  - `dedupe_local_vs_kb.py` - Compare local files against KB_Shared to prevent duplicates
+- **Log Rotation Resilience**: Fixed `PermissionError` crash when log file is locked (Windows WinError 32). Watcher now handles locked log files gracefully without crashing. - **Dual Transcript Format**: Output folders now include both `.md` and `.json` transcript files for better compatibility and structured access.

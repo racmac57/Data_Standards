@@ -1,0 +1,445 @@
+# Process_UDD_Chatlog.bat - Comprehensive Test Plan
+
+## Version: 1.3.0
+## Test Date: _______________
+## Tester: _______________
+
+---
+
+## Pre-Test Setup
+
+### 1. Create Test Base Directory
+```powershell
+# Create main test directory
+New-Item -ItemType Directory -Path "C:\test_chatlog_processor" -Force
+cd C:\test_chatlog_processor
+```
+
+### 2. Create Test Chatlog Files
+```powershell
+# Create sample chatlog files in Downloads
+$testContent = @"
+# Test Chatlog File
+This is a test chatlog file for testing the Process_UDD_Chatlog.bat script.
+It contains sample content to verify processing works correctly.
+"@
+
+# Create multiple test files
+1..7 | ForEach-Object {
+    $testContent | Out-File -FilePath "C:\Users\carucci_r\Downloads\test_chatlog_00$_.md" -Encoding UTF8
+}
+```
+
+### 3. Verify Watcher is Running
+```powershell
+# Check if watcher is running
+Get-Process python -ErrorAction SilentlyContinue | Where-Object { 
+    $cmdLine = (Get-WmiObject Win32_Process -Filter "ProcessId = $($_.Id)").CommandLine
+    $cmdLine -like '*watcher_splitter.py*'
+}
+```
+
+---
+
+## Test Scenarios
+
+### ✅ Scenario 1: Normal Operation - Existing `docs` Folder
+
+**Objective:** Verify script detects and uses existing lowercase `docs` folder (preferred).
+
+**Setup:**
+```powershell
+# Create test workspace with existing docs folder
+New-Item -ItemType Directory -Path "C:\test_chatlog_processor\workspace_standard" -Force
+New-Item -ItemType Directory -Path "C:\test_chatlog_processor\workspace_standard\docs" -Force
+
+# Create test file in workspace root
+"# Test File 1`nContent for testing." | Out-File -FilePath "C:\test_chatlog_processor\workspace_standard\test_chatlog_001.md" -Encoding UTF8
+```
+
+**Test Command:**
+```batch
+cd "C:\Users\carucci_r\OneDrive - City of Hackensack\09_Reference\Standards\unified_data_dictionary\scripts"
+Process_UDD_Chatlog.bat "C:\test_chatlog_processor\workspace_standard\test_chatlog_001.md"
+```
+
+**Expected Results:**
+- ✅ Detects `docs` folder
+- ✅ Creates `docs\raw\` and `docs\chunked\` subdirectories
+- ✅ Moves file to `docs\raw\test_chatlog_001.md`
+- ✅ Processes file and creates chunks in `docs\chunked\`
+- ✅ Echo shows: `[OK] Raw dir: docs\raw`
+- ✅ Echo shows: `[OK] Chunked dir: docs\chunked`
+- ✅ Log entry: "Detected directory structure: docs"
+
+**Validation:**
+```powershell
+# Verify structure created
+Test-Path "C:\test_chatlog_processor\workspace_standard\docs\raw\test_chatlog_001.md"
+Test-Path "C:\test_chatlog_processor\workspace_standard\docs\chunked\test_chatlog_001"
+Get-ChildItem "C:\test_chatlog_processor\workspace_standard\docs\chunked\test_chatlog_001" -Filter "chunk_*.txt"
+```
+
+---
+
+### ✅ Scenario 2: Case Variant - Existing `Doc` Folder (Different Case)
+
+**Objective:** Verify script detects case-insensitive variants and uses actual directory case.
+
+**Setup:**
+```powershell
+# Create test workspace with Doc (capital D) folder
+New-Item -ItemType Directory -Path "C:\test_chatlog_processor\workspace_doc_variant" -Force
+New-Item -ItemType Directory -Path "C:\test_chatlog_processor\workspace_doc_variant\Doc" -Force
+
+# Create test file
+"# Test File 2`nContent for testing." | Out-File -FilePath "C:\test_chatlog_processor\workspace_doc_variant\test_chatlog_002.md" -Encoding UTF8
+```
+
+**Test Command:**
+```batch
+Process_UDD_Chatlog.bat "C:\test_chatlog_processor\workspace_doc_variant\test_chatlog_002.md"
+```
+
+**Expected Results:**
+- ✅ Detects `Doc` folder (preserves actual case)
+- ✅ Creates `Doc\raw\` and `Doc\chunked\` subdirectories
+- ✅ Echo shows: `[INFO] Found existing directory structure: Doc`
+- ✅ Uses actual case: `Doc\raw` and `Doc\chunked`
+
+**Validation:**
+```powershell
+Test-Path "C:\test_chatlog_processor\workspace_doc_variant\Doc\raw\test_chatlog_002.md"
+Test-Path "C:\test_chatlog_processor\workspace_doc_variant\Doc\chunked\test_chatlog_002"
+```
+
+---
+
+### ✅ Scenario 3: Numbered Project Structure
+
+**Objective:** Verify script detects numbered folder pattern and creates appropriate numbered docs folder.
+
+**Setup:**
+```powershell
+# Create numbered project structure
+New-Item -ItemType Directory -Path "C:\test_chatlog_processor\workspace_numbered" -Force
+New-Item -ItemType Directory -Path "C:\test_chatlog_processor\workspace_numbered\01_scripts" -Force
+New-Item -ItemType Directory -Path "C:\test_chatlog_processor\workspace_numbered\02_data" -Force
+New-Item -ItemType Directory -Path "C:\test_chatlog_processor\workspace_numbered\03_output" -Force
+
+# Create test file
+"# Test File 3`nContent for testing." | Out-File -FilePath "C:\test_chatlog_processor\workspace_numbered\test_chatlog_003.md" -Encoding UTF8
+```
+
+**Test Command:**
+```batch
+Process_UDD_Chatlog.bat "C:\test_chatlog_processor\workspace_numbered\test_chatlog_003.md"
+```
+
+**Expected Results:**
+- ✅ Detects numbered structure (>50% folders use `[0-9][0-9]_` pattern)
+- ✅ Creates `40_docs\raw\` and `40_docs\chunked\` (or next available number)
+- ✅ Echo shows: `[INFO] Detected numbered folder structure, using: 40_docs`
+- ✅ If higher numbered folders exist, uses next increment (e.g., `50_docs`)
+
+**Validation:**
+```powershell
+Test-Path "C:\test_chatlog_processor\workspace_numbered\40_docs\raw\test_chatlog_003.md"
+Test-Path "C:\test_chatlog_processor\workspace_numbered\40_docs\chunked\test_chatlog_003"
+```
+
+**Advanced Test - Higher Numbered Folders:**
+```powershell
+# Add higher numbered folder
+New-Item -ItemType Directory -Path "C:\test_chatlog_processor\workspace_numbered\45_reports" -Force
+
+# Run again with new file
+"# Test File 3b`nContent." | Out-File -FilePath "C:\test_chatlog_processor\workspace_numbered\test_chatlog_003b.md" -Encoding UTF8
+Process_UDD_Chatlog.bat "C:\test_chatlog_processor\workspace_numbered\test_chatlog_003b.md"
+
+# Should create 50_docs (45 + 10, minimum 40)
+Test-Path "C:\test_chatlog_processor\workspace_numbered\50_docs"
+```
+
+---
+
+### ✅ Scenario 4: Standard Project (No Existing Structure)
+
+**Objective:** Verify script creates standard `docs` folder when no existing structure found.
+
+**Setup:**
+```powershell
+# Create clean workspace with no doc/docs folders
+New-Item -ItemType Directory -Path "C:\test_chatlog_processor\workspace_clean" -Force
+New-Item -ItemType Directory -Path "C:\test_chatlog_processor\workspace_clean\scripts" -Force
+New-Item -ItemType Directory -Path "C:\test_chatlog_processor\workspace_clean\data" -Force
+
+# Create test file
+"# Test File 4`nContent for testing." | Out-File -FilePath "C:\test_chatlog_processor\workspace_clean\test_chatlog_004.md" -Encoding UTF8
+```
+
+**Test Command:**
+```batch
+Process_UDD_Chatlog.bat "C:\test_chatlog_processor\workspace_clean\test_chatlog_004.md"
+```
+
+**Expected Results:**
+- ✅ Detects standard structure (not numbered)
+- ✅ Creates `docs\raw\` and `docs\chunked\` (standard)
+- ✅ Echo shows: `[INFO] No existing doc/docs structure found, using standard: docs`
+
+**Validation:**
+```powershell
+Test-Path "C:\test_chatlog_processor\workspace_clean\docs\raw\test_chatlog_004.md"
+Test-Path "C:\test_chatlog_processor\workspace_clean\docs\chunked\test_chatlog_004"
+```
+
+---
+
+### ✅ Scenario 5: Chunker Special Case (C:\_chunker)
+
+**Objective:** Verify special handling for chunker project always uses `docs`.
+
+**Setup:**
+```powershell
+# Create test file in chunker-like structure (or use actual if safe)
+# Note: Only test if you have a safe test location
+# For safety, create a test chunker location
+New-Item -ItemType Directory -Path "C:\test_chunker" -Force
+New-Item -ItemType Directory -Path "C:\test_chunker\docs" -Force
+
+# Create test file
+"# Test File 5`nContent for testing." | Out-File -FilePath "C:\test_chunker\test_chatlog_005.md" -Encoding UTF8
+```
+
+**Test Command:**
+```batch
+# Modify script temporarily to test with C:\test_chunker, OR
+# Test with actual C:\_chunker if you have a test file there
+Process_UDD_Chatlog.bat "C:\test_chunker\test_chatlog_005.md"
+```
+
+**Expected Results:**
+- ✅ Always uses `docs` (plural) regardless of other folders
+- ✅ Echo shows: `[OK] Workspace: C:\_chunker (chunker project)`
+- ✅ Log entry: "Detected chunker project: C:\_chunker"
+
+**Note:** If testing with actual `C:\_chunker`, ensure you have a test file that won't interfere with production.
+
+---
+
+### ✅ Scenario 6: Multi-File Processing
+
+**Objective:** Verify variables reset correctly between files and no bleed occurs.
+
+**Setup:**
+```powershell
+# Create workspace
+New-Item -ItemType Directory -Path "C:\test_chatlog_processor\workspace_multi" -Force
+New-Item -ItemType Directory -Path "C:\test_chatlog_processor\workspace_multi\docs" -Force
+
+# Create multiple test files in Downloads
+1..3 | ForEach-Object {
+    "# Test File Multi $_`nContent for file $_." | Out-File -FilePath "C:\Users\carucci_r\Downloads\test_multi_00$_.md" -Encoding UTF8
+}
+```
+
+**Test Command:**
+```batch
+Process_UDD_Chatlog.bat "C:\Users\carucci_r\Downloads\test_multi_001.md" "C:\Users\carucci_r\Downloads\test_multi_002.md" "C:\Users\carucci_r\Downloads\test_multi_003.md"
+```
+
+**Expected Results:**
+- ✅ Processes all 3 files sequentially
+- ✅ Each file gets its own processing output
+- ✅ Variables reset between files (no DOCS_BASE bleed)
+- ✅ Final summary shows: "Processed: 3 files, Failed: 0 files"
+- ✅ All files end up in correct locations
+
+**Validation:**
+```powershell
+# Check all files processed
+1..3 | ForEach-Object {
+    $file = "test_multi_00$_.md"
+    Write-Host "Checking $file..."
+    Test-Path "C:\test_chatlog_processor\workspace_multi\docs\raw\$file"
+}
+```
+
+---
+
+### ✅ Scenario 7: Error Handling - Invalid PROJECT_ROOT
+
+**Objective:** Verify script handles errors gracefully and exits cleanly.
+
+**Setup:**
+```powershell
+# Create test file in a location that will cause detection issues
+# Option A: File in non-existent project
+"# Test File Error`nContent." | Out-File -FilePath "C:\Users\carucci_r\Downloads\test_error_001.md" -Encoding UTF8
+
+# Option B: Create file in location with invalid path
+# (This will test PROJECT_ROOT validation)
+```
+
+**Test Command:**
+```batch
+# Test with file that should trigger error
+Process_UDD_Chatlog.bat "C:\Users\carucci_r\Downloads\test_error_001.md"
+```
+
+**Expected Results:**
+- ✅ If detection fails: Shows `[ERROR] Failed to detect docs directory structure`
+- ✅ Script pauses (user can read error)
+- ✅ Script exits with `exit /b 1`
+- ✅ No empty path displays
+- ✅ No continuation with broken state
+
+**Manual Error Injection Test:**
+To test error handling more directly, you can temporarily modify the script to set an invalid PROJECT_ROOT:
+
+```batch
+REM Temporarily add at start of :DETECT_DOCS_DIRECTORY for testing
+set "PROJECT_ROOT=C:\nonexistent_path_12345"
+```
+
+**Expected:**
+- ✅ Error message displayed
+- ✅ Script exits cleanly
+- ✅ No downstream failures
+
+---
+
+## Debug Mode Testing
+
+### Enable Debug Mode
+
+**Test Command:**
+```batch
+Process_UDD_Chatlog.bat "C:\test_chatlog_processor\workspace_standard\test_chatlog_001.md" -v
+```
+
+**Expected Results:**
+- ✅ Shows `[DEBUG] Debug mode enabled`
+- ✅ Shows `[DEBUG] Checking for: C:\...\docs`
+- ✅ Shows `[DEBUG] Found directory: ...`
+- ✅ Shows `[DEBUG] Total folders found: X`
+- ✅ Shows `[DEBUG] Numbered folders: X / Y`
+- ✅ Detailed detection logic visible
+
+---
+
+## Log File Verification
+
+### Check Activity Log
+
+**Location:** `C:\Users\carucci_r\OneDrive - City of Hackensack\chatlog_processor.log`
+
+**Verification:**
+```powershell
+# View log entries
+Get-Content "C:\Users\carucci_r\OneDrive - City of Hackensack\chatlog_processor.log" -Tail 20
+
+# Should see entries like:
+# 01/13/2026 12:00:00 - Processing: test_chatlog_001.md in project: workspace_standard
+# 01/13/2026 12:00:05 - Detected directory structure: docs
+# 01/13/2026 12:00:30 - Completed: test_chatlog_001.md - 3 chunks
+```
+
+---
+
+## Test Results Template
+
+| Scenario | Status | Notes | Issues Found |
+|----------|--------|-------|-------------|
+| 1. Normal Operation (docs) | ⬜ Pass / ⬜ Fail | | |
+| 2. Case Variant (Doc) | ⬜ Pass / ⬜ Fail | | |
+| 3. Numbered Structure | ⬜ Pass / ⬜ Fail | | |
+| 4. Standard Project | ⬜ Pass / ⬜ Fail | | |
+| 5. Chunker Special Case | ⬜ Pass / ⬜ Fail | | |
+| 6. Multi-File Processing | ⬜ Pass / ⬜ Fail | | |
+| 7. Error Handling | ⬜ Pass / ⬜ Fail | | |
+| Debug Mode | ⬜ Pass / ⬜ Fail | | |
+| Log File | ⬜ Pass / ⬜ Fail | | |
+
+---
+
+## Cleanup After Testing
+
+```powershell
+# Remove test directories (when done testing)
+Remove-Item -Path "C:\test_chatlog_processor" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "C:\test_chunker" -Recurse -Force -ErrorAction SilentlyContinue
+
+# Remove test files from Downloads
+Remove-Item -Path "C:\Users\carucci_r\Downloads\test_*.md" -Force -ErrorAction SilentlyContinue
+```
+
+---
+
+## Quick Test Script
+
+Save this as `run_all_tests.bat` for automated testing:
+
+```batch
+@echo off
+echo ============================================================================
+echo Process_UDD_Chatlog.bat - Automated Test Suite
+echo ============================================================================
+echo.
+
+cd /d "C:\Users\carucci_r\OneDrive - City of Hackensack\09_Reference\Standards\unified_data_dictionary\scripts"
+
+echo [TEST 1] Normal Operation - Existing docs folder
+call Process_UDD_Chatlog.bat "C:\test_chatlog_processor\workspace_standard\test_chatlog_001.md"
+echo.
+pause
+
+echo [TEST 2] Case Variant - Doc folder
+call Process_UDD_Chatlog.bat "C:\test_chatlog_processor\workspace_doc_variant\test_chatlog_002.md"
+echo.
+pause
+
+echo [TEST 3] Numbered Structure
+call Process_UDD_Chatlog.bat "C:\test_chatlog_processor\workspace_numbered\test_chatlog_003.md"
+echo.
+pause
+
+echo [TEST 4] Standard Project
+call Process_UDD_Chatlog.bat "C:\test_chatlog_processor\workspace_clean\test_chatlog_004.md"
+echo.
+pause
+
+echo [TEST 5] Debug Mode
+call Process_UDD_Chatlog.bat "C:\test_chatlog_processor\workspace_standard\test_chatlog_001.md" -v
+echo.
+pause
+
+echo ============================================================================
+echo All tests complete. Review results above.
+echo ============================================================================
+pause
+```
+
+---
+
+## Notes
+
+- **Watcher Dependency:** Ensure watcher is running for file processing to complete
+- **OneDrive Sync:** Some paths may take time to sync if using OneDrive
+- **File Permissions:** Ensure test directories have write permissions
+- **Timeouts:** Processing may take 30-300 seconds depending on file size and watcher queue
+
+---
+
+## Success Criteria
+
+All scenarios pass if:
+- ✅ Correct directory structure detected/created
+- ✅ Files moved to correct raw folder
+- ✅ Chunks created in correct chunked folder
+- ✅ No duplicate doc/docs folders created
+- ✅ Error handling works correctly
+- ✅ Debug mode provides useful output
+- ✅ Log file records key events
+- ✅ Multi-file processing resets variables correctly

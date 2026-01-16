@@ -1,0 +1,878 @@
+exit 1
+}
+
+Write-Host "===============================================" -ForegroundColor White
+Write-Host "Processing Complete" -ForegroundColor Green
+Write-Host "===============================================" -ForegroundColor White
+
+if ($script:HadErrors) {
+    exit 1
+}
+else {
+    exit 0
+}
+
+
+```
+
+Adding transcript logging to the PowerShell script and ensuring it stops properly:
+
+
+```powershell
+# Send to Chunker - OPTIMIZED VERSION (Move-Based Workflow)
+# Moves files/folders from OneDrive to chunker watch folder with origin manifest
+# Reduces storage bloat and OneDrive sync overhead by 50%+
+
+param(
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]$Paths
+)
+
+$ErrorActionPreference = 'Continue'
+$script:HadErrors = $false
+$DestFolder = "C:\_chunker\02_data"
+$KeyFile = "C:\_chunker\06_config\manifest_hmac.key"
+$LogFolder = "C:\_chunker\logs"
+
+# Start Transcript Logging (Captures output to file even if window closes)
+if (-not (Test-Path $LogFolder)) {
+    New-Item -ItemType Directory -Path $LogFolder -Force | Out-Null
+}
+$LogFile = Join-Path $LogFolder "Chunker_Move_$(Get-Date -Format 'yyyyMMdd_HHmmss').txt"
+try {
+    Start-Transcript -Path $LogFile -Append -ErrorAction SilentlyContinue
+} catch {
+    # Transcript may fail in some contexts, continue without it
+}
+
+# Ensure destination exists
+if (-not (Test-Path $DestFolder)) {
+    New-Item -ItemType Directory -Path $DestFolder -Force | Out-Null
+}
+
+# Load HMAC key if present
+$HmacKey = $null
+if (Test-Path $KeyFile) {
+    try {
+        $HmacKey = [System.IO.File]::ReadAllBytes($KeyFile)
+    }
+    catch {
+        Write-Warning "Failed to load HMAC key: $_"
+    }
+}
+
+function Get-FileSHA256 {
+    param([string]$Path)
+    try {
+        $hash = Get-FileHash -Path $Path -Algorithm SHA256
+        return $hash.Hash.ToLower()
+    }
+    catch {
+        return $null
+    }
+}
+
+function Get-HMACSHA256 {
+    param(
+        [byte[]]$Key,
+        [byte[]]$Data
+    )
+    try {
+        $hmac = New-Object System.Security.Cryptography.HMACSHA256
+        $hmac.Key = $Key
+        $hashBytes = $hmac.ComputeHash($Data)
+        return [System.BitConverter]::ToString($hashBytes).Replace('-', '').ToLower()
+    }
+    catch {
+        return $null
+    }
+    finally {
+        if ($hmac) { $hmac.Dispose() }
+    }
+}
+
+function Process-File {
+    param(
+        [string]$SourcePath,
+        [string]$DestPath
+    )
+
+    if (-not (Test-Path $SourcePath)) {
+        Write-Warning "Source file not found: $SourcePath"
+        return
+    }
+
+    # Skip if source file is already a manifest file (should be caught earlier, but double-check)
+    if ($SourcePath -like "*.origin.json") {
+        Write-Warning "Skipping manifest file: $SourcePath"
+        return
+    }
+
+    $destDir = Split-Path $DestPath -Parent
+    if (-not (Test-Path $destDir)) {
+        New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+    }
+
+    # Get file info BEFORE move/copy
+    $fileInfo = Get-Item $SourcePath
+    
+    # Strip any existing .origin.json suffix from the destination filename
+    # to prevent cascading .origin.json.origin.json issues
+    $destName = [System.IO.Path]::GetFileName($DestPath)
+    while ($destName -like "*.origin.json") {
+        $destName = $destName -replace '\.origin\.json$', ''
+    }
+    if ($destName -ne [System.IO.Path]::GetFileName($DestPath)) {
+        $DestPath = Join-Path (Split-Path $DestPath -Parent) $destName
+    }
+    
+    $sha256 = Get-FileSHA256 -Path $SourcePath
+
+    # Get original filename without any .origin.json suffix for manifest
+    $originalName = $fileInfo.Name
+    while ($originalName -like "*.origin.json") {
+        $originalName = $originalName -replace '\.origin\.json$', ''
+    }
+
+    # Create manifest BEFORE moving file
+    $manifest = @{
+        original_full_path = $fileInfo.FullName
+        original_directory = $fileInfo.DirectoryName
+        original_filename  = $originalName
+        sent_at            = (Get-Date).ToUniversalTime().ToString("o")
+        integrity_sha256   = $sha256
+        size_bytes         = $fileInfo.Length
+        modified_time      = $fileInfo.LastWriteTimeUtc.ToString("o")
+        created_time       = $fileInfo.CreationTimeUtc.ToString("o")
+        operation          = "MOVE"
+        source_cleanup     = "pending"
+    }
+
+    # Try to MOVE file (primary operation)
+    $moveSuccess = $false
+    try {
+        Move-Item -Path $SourcePath -Destination $DestPath -Force -ErrorAction Stop
+        $moveSuccess = $true
+        Write-Host "[MOVE] Successfully moved: $($fileInfo.Name)" -ForegroundColor Green
+
+        # Guard against OneDrive or sync clients restoring the original file immediately after move
+        Start-Sleep -Milliseconds 300
+        if (Test-Path $SourcePath) {
+            try {
+                Remove-Item -Path $SourcePath -Force -ErrorAction Stop
+                Write-Host "[CLEANUP] Removed residual source copy: $($fileInfo.Name)" -ForegroundColor DarkYellow
+                $manifest.source_cleanup = "removed_residual_copy"
+            }
+            catch {
+                Write-Warning "Residual source copy could not be removed for $($fileInfo.Name): $_"
+                $manifest.source_cleanup = "cleanup_failed"
+                $manifest.source_cleanup_error = $_.ToString()
+                $script:HadErrors = $true
+            }
+        }
+        else {
+            $manifest.source_cleanup = "not_required"
+        }
+    }
+    catch {
+        $moveError = $_
+        # Fallback to COPY if MOVE fails
+        Write-Warning "MOVE failed for $($fileInfo.Name): $moveError"
+        Write-Warning "Falling back to COPY operation"
+        $manifest.operation = "COPY_FALLBACK"
+        $manifest.move_error = $moveError.ToString()
+        
+        try {
+            Copy-Item -Path $SourcePath -Destination $DestPath -Force -ErrorAction Stop
+            Write-Host "[COPY] Used fallback for: $($fileInfo.Name)" -ForegroundColor Yellow
+            
+            # Update manifest to reflect we're using original file
+            $manifest.fallback_reason = $moveError.ToString()
+
+            Start-Sleep -Milliseconds 300
+            if (Test-Path $SourcePath) {
+                try {
+                    Remove-Item -Path $SourcePath -Force -ErrorAction Stop
+                    Write-Host "[CLEANUP] Removed source after copy fallback: $($fileInfo.Name)" -ForegroundColor DarkYellow
+                    $manifest.source_cleanup = "removed_after_copy"
+                }
+                catch {
+                    Write-Warning "Failed to remove source after copy fallback for $($fileInfo.Name): $_"
+                    $manifest.source_cleanup = "cleanup_failed_after_copy"
+                    $manifest.source_cleanup_error = $_.ToString()
+                    $script:HadErrors = $true
+                }
+            }
+            else {
+                $manifest.source_cleanup = "not_found_after_copy"
+            }
+        }
+        catch {
+            Write-Warning "Both MOVE and COPY failed for $SourcePath : $_"
+            $manifest.operation = "FAILED"
+            $manifest.copy_error = $_.ToString()
+            $script:HadErrors = $true
+            return
+        }
+    }
+
+    if (Test-Path $DestPath) {
+        $manifest.destination_status = "present"
+    }
+    else {
+        Write-Warning "Destination missing after operation for $($fileInfo.Name)"
+        $manifest.destination_status = "missing"
+        $script:HadErrors = $true
+    }
+
+    if (Test-Path $SourcePath) {
+        Write-Warning "Source still present after operation for $($fileInfo.Name)"
+        if ($manifest.source_cleanup -eq "pending") {
+            $manifest.source_cleanup = "source_still_present"
+        }
+        $script:HadErrors = $true
+    }
+    elseif ($manifest.source_cleanup -eq "pending") {
+        $manifest.source_cleanup = "cleared"
+    }
+
+    # Write manifest (regardless of MOVE/COPY)
+    try {
+        $manifestPath = "$DestPath.origin.json"
+        if (-not $manifest.ContainsKey('source_cleanup')) {
+            $manifest.source_cleanup = "not_applicable"
+        }
+        $manifestJson = $manifest | ConvertTo-Json -Depth 10
+        
+        [System.IO.File]::WriteAllText($manifestPath, $manifestJson, [System.Text.Encoding]::UTF8)
+        Write-Host "[MANIFEST] Created: $($fileInfo.Name).origin.json" -ForegroundColor Cyan
+    }
+    catch {
+        Write-Warning "Failed to create manifest for $SourcePath : $_"
+    }
+
+    # Add HMAC if key present
+    if ($HmacKey) {
+        try {
+            $fileBytes = [System.IO.File]::ReadAllBytes($DestPath)
+            $manifestBytes = [System.Text.Encoding]::UTF8.GetBytes($manifestJson)
+            $combinedBytes = $fileBytes + $manifestBytes
+            $hmacHash = Get-HMACSHA256 -Key $HmacKey -Data $combinedBytes
+
+            if ($hmacHash) {
+                $manifest.hmac_sha256 = $hmacHash
+                $manifestJson = $manifest | ConvertTo-Json -Depth 10
+                [System.IO.File]::WriteAllText($manifestPath, $manifestJson, [System.Text.Encoding]::UTF8)
+                Write-Host "[HMAC] Added integrity check" -ForegroundColor Magenta
+            }
+        }
+        catch {
+            Write-Warning "Failed to compute HMAC for $($fileInfo.Name): $_"
+        }
+    }
+}
+
+function Process-Item {
+    param(
+        [string]$Path
+    )
+
+    if (-not (Test-Path $Path)) {
+        Write-Warning "Path not found: $Path"
+        return
+    }
+
+    # Skip manifest files entirely - they should never be processed
+    if ($Path -like "*.origin.json") {
+        Write-Warning "Skipping manifest file: $Path"
+        return
+    }
+
+    $item = Get-Item $Path
+
+    if ($item.PSIsContainer) {
+        # Process folder recursively - skip manifest files
+        Write-Host "[FOLDER] Processing recursively: $($item.Name)" -ForegroundColor Blue
+        $files = Get-ChildItem -Path $Path -File -Recurse | Where-Object { $_.Name -notlike "*.origin.json" }
+        foreach ($file in $files) {
+            $relativePath = $file.FullName.Substring($Path.Length).TrimStart('\')
+            $destPath = Join-Path $DestFolder $relativePath
+            Process-File -SourcePath $file.FullName -DestPath $destPath
+        }
+    }
+    else {
+        # Process single file - strip .origin.json suffix if present in filename
+        $baseName = $item.Name
+        while ($baseName -like "*.origin.json") {
+            $baseName = $baseName -replace '\.origin\.json$', ''
+        }
+        $destPath = Join-Path $DestFolder $baseName
+        Process-File -SourcePath $item.FullName -DestPath $destPath
+    }
+}
+
+# Process all input paths
+Write-Host "===============================================" -ForegroundColor White
+Write-Host "Chunker Move-Optimized SendTo Script" -ForegroundColor White
+Write-Host "===============================================" -ForegroundColor White
+Write-Host "Destination: $DestFolder" -ForegroundColor Cyan
+Write-Host ""
+
+# Debug: Show what we received
+Write-Host "[DEBUG] Arguments received: $($Paths.Count) path(s)" -ForegroundColor Gray
+if ($Paths -and $Paths.Count -gt 0) {
+    foreach ($p in $Paths) {
+        Write-Host "[DEBUG]   - $p" -ForegroundColor Gray
+    }
+} else {
+    Write-Host "[DEBUG]   - No paths received (Paths is null or empty)" -ForegroundColor Yellow
+}
+
+Write-Host ""
+
+# Check if any paths were provided
+if (-not $Paths -or $Paths.Count -eq 0) {
+    Write-Error "ERROR: No files or folders were provided to process." Write-Host ""
+    Write-Host "Usage:" -ForegroundColor Yellow
+    Write-Host "  1. Select files/folders in Windows Explorer" -ForegroundColor Yellow
+    Write-Host "  2. Right-click -> Send To -> Chunker Move-Optimized" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "OR" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "  1. Select files in Directory Opus" -ForegroundColor Yellow
+    Write-Host "  2. Click the Chunker Move button" -ForegroundColor Yellow
+    Write-Host ""
+    exit 1
+}
+
+Write-Host "Processing $($Paths.Count) item(s)..." -ForegroundColor Yellow
+Write-Host ""
+
+$processedCount = 0
+foreach ($path in $Paths) {
+    if ($path -and $path.Trim()) {
+        Write-Host "Processing: $path" -ForegroundColor White
+        Process-Item -Path $path.Trim()
+        $processedCount++
+        Write-Host ""
+    }
+}
+
+if ($processedCount -eq 0) {
+    Write-Warning "No valid paths were processed. All paths may have been empty or invalid." exit 1
+}
+
+Write-Host "===============================================" -ForegroundColor White
+if ($script:HadErrors) {
+    Write-Host "Processing Complete with ERRORS" -ForegroundColor Red
+} else {
+    Write-Host "Processing Complete" -ForegroundColor Green
+}
+Write-Host "===============================================" -ForegroundColor White
+
+# Stop transcript logging
+try {
+    Stop-Transcript -ErrorAction SilentlyContinue | Out-Null
+} catch {
+    # Transcript may not have been started, ignore
+}
+
+# Show log file location if transcript was created
+if (Test-Path $LogFile) {
+    Write-Host ""
+    Write-Host "Log file saved to: $LogFile" -ForegroundColor Gray
+}
+
+if ($script:HadErrors) {
+    Write-Host ""
+    Write-Host "Press Enter to exit..." -ForegroundColor Yellow
+    [void][System.Console]::ReadLine()
+    exit 1
+}
+else {
+    exit 0
+}
+
+
+```
+
+```powershell
+# Send to Chunker - OPTIMIZED VERSION (Move-Based Workflow)
+# Moves files/folders from OneDrive to chunker watch folder with origin manifest
+# Reduces storage bloat and OneDrive sync overhead by 50%+
+
+param(
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]$Paths
+)
+
+$ErrorActionPreference = 'Continue'
+$script:HadErrors = $false
+$DestFolder = "C:\_chunker\02_data"
+$KeyFile = "C:\_chunker\06_config\manifest_hmac.key"
+$LogFolder = "C:\_chunker\logs"
+
+# Start Transcript Logging (Captures output to file even if window closes)
+if (-not (Test-Path $LogFolder)) {
+    New-Item -ItemType Directory -Path $LogFolder -Force | Out-Null
+}
+$LogFile = Join-Path $LogFolder "Chunker_Move_$(Get-Date -Format 'yyyyMMdd_HHmmss').txt"
+try {
+    Start-Transcript -Path $LogFile -Append -ErrorAction SilentlyContinue
+} catch {
+    # Transcript may fail in some contexts, continue without it
+}
+
+# Ensure destination exists
+if (-not (Test-Path $DestFolder)) {
+    New-Item -ItemType Directory -Path $DestFolder -Force | Out-Null
+}
+
+# Load HMAC key if present
+$HmacKey = $null
+if (Test-Path $KeyFile) {
+    try {
+        $HmacKey = [System.IO.File]::ReadAllBytes($KeyFile)
+    }
+    catch {
+        Write-Warning "Failed to load HMAC key: $_"
+    }
+}
+
+function Get-FileSHA256 {
+    param([string]$Path)
+    try {
+        $hash = Get-FileHash -Path $Path -Algorithm SHA256
+        return $hash.Hash.ToLower()
+    }
+    catch {
+        return $null
+    }
+}
+
+function Get-HMACSHA256 {
+    param(
+        [byte[]]$Key,
+        [byte[]]$Data
+    )
+    try {
+        $hmac = New-Object System.Security.Cryptography.HMACSHA256
+        $hmac.Key = $Key
+        $hashBytes = $hmac.ComputeHash($Data)
+        return [System.BitConverter]::ToString($hashBytes).Replace('-', '').ToLower()
+    }
+    catch {
+        return $null
+    }
+    finally {
+        if ($hmac) { $hmac.Dispose() }
+    }
+}
+
+function Process-File {
+    param(
+        [string]$SourcePath,
+        [string]$DestPath
+    )
+
+    if (-not (Test-Path $SourcePath)) {
+        Write-Warning "Source file not found: $SourcePath"
+        return
+    }
+
+    # Skip if source file is already a manifest file (should be caught earlier, but double-check)
+    if ($SourcePath -like "*.origin.json") {
+        Write-Warning "Skipping manifest file: $SourcePath"
+        return
+    }
+
+    $destDir = Split-Path $DestPath -Parent
+    if (-not (Test-Path $destDir)) {
+        New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+    }
+
+    # Get file info BEFORE move/copy
+    $fileInfo = Get-Item $SourcePath
+    
+    # Strip any existing .origin.json suffix from the destination filename
+    # to prevent cascading .origin.json.origin.json issues
+    $destName = [System.IO.Path]::GetFileName($DestPath)
+    while ($destName -like "*.origin.json") {
+        $destName = $destName -replace '\.origin\.json$', ''
+    }
+    if ($destName -ne [System.IO.Path]::GetFileName($DestPath)) {
+        $DestPath = Join-Path (Split-Path $DestPath -Parent) $destName
+    }
+    
+    $sha256 = Get-FileSHA256 -Path $SourcePath
+
+    # Get original filename without any .origin.json suffix for manifest
+    $originalName = $fileInfo.Name
+    while ($originalName -like "*.origin.json") {
+        $originalName = $originalName -replace '\.origin\.json$', ''
+    }
+
+    # Create manifest BEFORE moving file
+    $manifest = @{
+        original_full_path = $fileInfo.FullName
+        original_directory = $fileInfo.DirectoryName
+        original_filename  = $originalName
+        sent_at            = (Get-Date).ToUniversalTime().ToString("o")
+        integrity_sha256   = $sha256
+        size_bytes         = $fileInfo.Length
+        modified_time      = $fileInfo.LastWriteTimeUtc.ToString("o")
+        created_time       = $fileInfo.CreationTimeUtc.ToString("o")
+        operation          = "MOVE"
+        source_cleanup     = "pending"
+    }
+
+    # Try to MOVE file (primary operation)
+    $moveSuccess = $false
+    try {
+        Move-Item -Path $SourcePath -Destination $DestPath -Force -ErrorAction Stop
+        $moveSuccess = $true
+        Write-Host "[MOVE] Successfully moved: $($fileInfo.Name)" -ForegroundColor Green
+
+        # Guard against OneDrive or sync clients restoring the original file immediately after move
+        Start-Sleep -Milliseconds 300
+        if (Test-Path $SourcePath) {
+            try {
+                Remove-Item -Path $SourcePath -Force -ErrorAction Stop
+                Write-Host "[CLEANUP] Removed residual source copy: $($fileInfo.Name)" -ForegroundColor DarkYellow
+                $manifest.source_cleanup = "removed_residual_copy"
+            }
+            catch {
+                Write-Warning "Residual source copy could not be removed for $($fileInfo.Name): $_"
+                $manifest.source_cleanup = "cleanup_failed"
+                $manifest.source_cleanup_error = $_.ToString()
+                $script:HadErrors = $true
+            }
+        }
+        else {
+            $manifest.source_cleanup = "not_required"
+        }
+    }
+    catch {
+        $moveError = $_
+        # Fallback to COPY if MOVE fails
+        Write-Warning "MOVE failed for $($fileInfo.Name): $moveError"
+        Write-Warning "Falling back to COPY operation"
+        $manifest.operation = "COPY_FALLBACK"
+        $manifest.move_error = $moveError.ToString()
+        
+        try {
+            Copy-Item -Path $SourcePath -Destination $DestPath -Force -ErrorAction Stop
+            Write-Host "[COPY] Used fallback for: $($fileInfo.Name)" -ForegroundColor Yellow
+            
+            # Update manifest to reflect we're using original file
+            $manifest.fallback_reason = $moveError.ToString()
+
+            Start-Sleep -Milliseconds 300
+            if (Test-Path $SourcePath) {
+                try {
+                    Remove-Item -Path $SourcePath -Force -ErrorAction Stop
+                    Write-Host "[CLEANUP] Removed source after copy fallback: $($fileInfo.Name)" -ForegroundColor DarkYellow
+                    $manifest.source_cleanup = "removed_after_copy"
+                }
+                catch {
+                    Write-Warning "Failed to remove source after copy fallback for $($fileInfo.Name): $_"
+                    $manifest.source_cleanup = "cleanup_failed_after_copy"
+                    $manifest.source_cleanup_error = $_.ToString()
+                    $script:HadErrors = $true
+                }
+            }
+            else {
+                $manifest.source_cleanup = "not_found_after_copy"
+            }
+        }
+        catch {
+            Write-Warning "Both MOVE and COPY failed for $SourcePath : $_"
+            $manifest.operation = "FAILED"
+            $manifest.copy_error = $_.ToString()
+            $script:HadErrors = $true
+            return
+        }
+    }
+
+    if (Test-Path $DestPath) {
+        $manifest.destination_status = "present"
+    }
+    else {
+        Write-Warning "Destination missing after operation for $($fileInfo.Name)"
+        $manifest.destination_status = "missing"
+        $script:HadErrors = $true
+    }
+
+    if (Test-Path $SourcePath) {
+        Write-Warning "Source still present after operation for $($fileInfo.Name)"
+        if ($manifest.source_cleanup -eq "pending") {
+            $manifest.source_cleanup = "source_still_present"
+        }
+        $script:HadErrors = $true
+    }
+    elseif ($manifest.source_cleanup -eq "pending") {
+        $manifest.source_cleanup = "cleared"
+    }
+
+    # Write manifest (regardless of MOVE/COPY)
+    try {
+        $manifestPath = "$DestPath.origin.json"
+        if (-not $manifest.ContainsKey('source_cleanup')) {
+            $manifest.source_cleanup = "not_applicable"
+        }
+        $manifestJson = $manifest | ConvertTo-Json -Depth 10
+        
+        [System.IO.File]::WriteAllText($manifestPath, $manifestJson, [System.Text.Encoding]::UTF8)
+        Write-Host "[MANIFEST] Created: $($fileInfo.Name).origin.json" -ForegroundColor Cyan
+    }
+    catch {
+        Write-Warning "Failed to create manifest for $SourcePath : $_"
+    }
+
+    # Add HMAC if key present
+    if ($HmacKey) {
+        try {
+            $fileBytes = [System.IO.File]::ReadAllBytes($DestPath)
+            $manifestBytes = [System.Text.Encoding]::UTF8.GetBytes($manifestJson)
+            $combinedBytes = $fileBytes + $manifestBytes
+            $hmacHash = Get-HMACSHA256 -Key $HmacKey -Data $combinedBytes
+
+            if ($hmacHash) {
+                $manifest.hmac_sha256 = $hmacHash
+                $manifestJson = $manifest | ConvertTo-Json -Depth 10
+                [System.IO.File]::WriteAllText($manifestPath, $manifestJson, [System.Text.Encoding]::UTF8)
+                Write-Host "[HMAC] Added integrity check" -ForegroundColor Magenta
+            }
+        }
+        catch {
+            Write-Warning "Failed to compute HMAC for $($fileInfo.Name): $_"
+        }
+    }
+}
+
+function Process-Item {
+    param(
+        [string]$Path
+    )
+
+    if (-not (Test-Path $Path)) {
+        Write-Warning "Path not found: $Path"
+        return
+    }
+
+    # Skip manifest files entirely - they should never be processed
+    if ($Path -like "*.origin.json") {
+        Write-Warning "Skipping manifest file: $Path"
+        return
+    }
+
+    $item = Get-Item $Path
+
+    if ($item.PSIsContainer) {
+        # Process folder recursively - skip manifest files
+        Write-Host "[FOLDER] Processing recursively: $($item.Name)" -ForegroundColor Blue
+        $files = Get-ChildItem -Path $Path -File -Recurse | Where-Object { $_.Name -notlike "*.origin.json" }
+        foreach ($file in $files) {
+            $relativePath = $file.FullName.Substring($Path.Length).TrimStart('\')
+            $destPath = Join-Path $DestFolder $relativePath
+            Process-File -SourcePath $file.FullName -DestPath $destPath
+        }
+    }
+    else {
+        # Process single file - strip .origin.json suffix if present in filename
+        $baseName = $item.Name
+        while ($baseName -like "*.origin.json") {
+            $baseName = $baseName -replace '\.origin\.json$', ''
+        }
+        $destPath = Join-Path $DestFolder $baseName
+        Process-File -SourcePath $item.FullName -DestPath $destPath
+    }
+}
+
+# Process all input paths
+Write-Host "===============================================" -ForegroundColor White
+Write-Host "Chunker Move-Optimized SendTo Script" -ForegroundColor White
+Write-Host "===============================================" -ForegroundColor White
+Write-Host "Destination: $DestFolder" -ForegroundColor Cyan
+if (Test-Path $LogFile) {
+    Write-Host "Log File: $LogFile" -ForegroundColor Gray
+}
+Write-Host ""
+
+# Debug: Show what we received
+Write-Host "[DEBUG] Arguments received: $($Paths.Count) path(s)" -ForegroundColor Gray
+if ($Paths -and $Paths.Count -gt 0) {
+    foreach ($p in $Paths) {
+        Write-Host "[DEBUG]   - $p" -ForegroundColor Gray
+    }
+} else {
+    Write-Host "[DEBUG]   - No paths received (Paths is null or empty)" -ForegroundColor Yellow
+}
+
+Write-Host ""
+
+# Check if any paths were provided
+if (-not $Paths -or $Paths.Count -eq 0) {
+    Write-Error "ERROR: No files or folders were provided to process." Write-Host ""
+    Write-Host "Usage:" -ForegroundColor Yellow
+    Write-Host "  1. Select files/folders in Windows Explorer" -ForegroundColor Yellow
+    Write-Host "  2. Right-click -> Send To -> Chunker Move-Optimized" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "OR" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "  1. Select files in Directory Opus" -ForegroundColor Yellow
+    Write-Host "  2. Click the Chunker Move button" -ForegroundColor Yellow
+    Write-Host ""
+    exit 1
+}
+
+Write-Host "Processing $($Paths.Count) item(s)..." -ForegroundColor Yellow
+Write-Host ""
+
+$processedCount = 0
+foreach ($path in $Paths) {
+    if ($path -and $path.Trim()) {
+        Write-Host "Processing: $path" -ForegroundColor White
+        Process-Item -Path $path.Trim()
+        $processedCount++
+        Write-Host ""
+    }
+}
+
+if ($processedCount -eq 0) {
+    Write-Warning "No valid paths were processed. All paths may have been empty or invalid." exit 1
+}
+
+Write-Host "===============================================" -ForegroundColor White
+if ($script:HadErrors) {
+    Write-Host "Processing Complete with ERRORS" -ForegroundColor Red
+} else {
+    Write-Host "Processing Complete" -ForegroundColor Green
+}
+Write-Host "===============================================" -ForegroundColor White
+
+# Stop transcript logging
+try {
+    Stop-Transcript -ErrorAction SilentlyContinue | Out-Null
+} catch {
+    # Transcript may not have been started, ignore
+}
+
+# Show log file location if transcript was created
+if (Test-Path $LogFile) {
+    Write-Host ""
+    Write-Host "Log file saved to: $LogFile" -ForegroundColor Gray
+}
+
+if ($script:HadErrors) {
+    Write-Host ""
+    Write-Host "Press Enter to exit..." -ForegroundColor Yellow
+    [void][System.Console]::ReadLine()
+    exit 1
+}
+else {
+    exit 0
+}
+
+
+```
+
+Integrating Gemini's fixes while preserving existing functionality. Implementing the key improvements:
+
+
+Integrating Gemini's fixes while preserving existing functionality. Creating a summary document:
+
+
+```markdown
+# Gemini's Fixes Applied to Chunker Move Scripts
+
+## Summary
+
+Gemini identified that the batch files were using `enabledelayedexpansion` which can crash when filenames contain `!` characters, and suggested using PowerShell 7 (`pwsh.exe`) instead of PowerShell 5.1. These fixes have been integrated. ## Key Changes Applied
+
+### 1. Batch Files - Disabled Delayed Expansion
+**Problem:** `setlocal enabledelayedexpansion` causes crashes when filenames contain `!` characters
+**Fix:** Changed to `setlocal disabledelayedexpansion` or removed delayed expansion
+
+### 2. PowerShell 7 Usage
+**Problem:** Batch files calling `PowerShell.exe` (PowerShell 5.1) instead of `pwsh.exe` (PowerShell 7)
+**Fix:** Updated both batch files to use `pwsh.exe` to match your environment
+
+### 3. Transcript Logging
+**Problem:** No way to debug if window closes instantly
+**Fix:** Added `Start-Transcript` to capture all output to log files in `C:\_chunker\logs\`
+
+### 4. Better Error Handling
+**Fix:** Added more robust error checking and logging
+
+## Files Updated
+
+1. ✅ `C:\Users\carucci_r\AppData\Roaming\Microsoft\Windows\SendTo\Chunker_MoveOptimized.bat`
+2. ✅ `C:\_chunker\opus\Chunker_Move.bat`
+3. ✅ `C:\_chunker\Chunker_MoveOptimized.ps1` (added transcript logging)
+
+## Testing
+
+Please test both methods:
+1. **Send To Menu:** Select files → Right-click → Send To → Chunker Move-Optimized
+2. **Directory Opus:** Select files → Click Chunker Move button
+
+If issues persist, check the log files in `C:\_chunker\logs\Chunker_Move_*.txt` for detailed error messages. ```
+
+Creating a summary document explaining what was applied:
+
+
+```markdown
+# Gemini's Fixes Applied - Summary
+
+## ✅ Fixes Successfully Applied
+
+Based on Gemini's recommendations, I've applied the following fixes:
+
+### 1. **Batch Files - Disabled Delayed Expansion** ✅
+- **Changed:** `setlocal enabledelayedexpansion` → `setlocal disabledelayedexpansion`
+- **Why:** Prevents crashes when filenames contain `!` characters
+- **Files Updated:**
+  - `C:\Users\carucci_r\AppData\Roaming\Microsoft\Windows\SendTo\Chunker_MoveOptimized.bat`
+  - `C:\_chunker\opus\Chunker_Move.bat`
+
+### 2. **PowerShell 7 Usage** ✅
+- **Changed:** `PowerShell.exe` → `pwsh.exe`
+- **Why:** Matches your environment (PowerShell 7 is installed)
+- **Note:** Verified `pwsh.exe` exists at `C:\Program Files\PowerShell\7\pwsh.exe`
+
+### 3. **Transcript Logging** ✅
+- **Added:** `Start-Transcript` at the beginning of PowerShell script
+- **Log Location:** `C:\_chunker\logs\Chunker_Move_YYYYMMDD_HHMMSS.txt`
+- **Why:** Captures output even if window closes, allowing debugging
+
+### 4. **Better Error Handling** ✅
+- **Added:** Improved exit code handling
+- **Added:** Log file location display
+- **Added:** Read-Host pause on errors
+
+## Current Script Status
+
+All three files have been updated with Gemini's fixes while preserving existing functionality:
+- HMAC key support (if key file exists)
+- OneDrive cleanup logic
+- Comprehensive manifest creation
+- Duplicate .origin.json suffix prevention
+- Move with fallback to Copy
+
+## Testing Instructions
+
+1. **Test Send To Menu:**
+   - Select a file in Downloads
+   - Right-click → Send To → Chunker Move-Optimized
+   - Window should stay open and show processing
+   - Check `C:\_chunker\02_data` for moved file
+   - Check `C:\_chunker\logs\` for transcript log
+
+2. **Test Directory Opus:**
+   - Select files in Directory Opus
+   - Click Chunker Move button
+   - Window should show processing output
+   - Files should move to `C:\_chunker\02_data`
+
+3.

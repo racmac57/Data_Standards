@@ -1,0 +1,999 @@
+Diagnostic questions — what to investigate
+7. Required fixes — specific fixes needed
+8. Testing requirements — verification steps
+9. Expected output example — what success looks like
+10. Success criteria — clear pass/fail conditions
+
+### Key information included
+
+- Full code for all 3 files:
+  - Send To batch file
+  - Directory Opus batch file  
+  - PowerShell script (key sections)
+- Environment details (Windows 10, PowerShell 7, paths)
+- Known working reference (script works when called directly)
+- What's already been tried
+- Clear success criteria
+
+### What the prompt asks for
+
+1. Diagnose why files aren't moving
+2. Fix argument passing from batch to PowerShell
+3. Keep the window visible for output
+4. Add proper error handling
+5. Test the logic
+6. Provide fixed versions of all files
+
+The prompt is ready to share with another AI assistant. It's self-contained with all necessary context, code, and requirements. Should I create a shorter executive summary version, or is this detailed prompt what you need? ---
+
+**User**
+
+Gemini's reply
+
+Based on the behavior you described (window flashing/closing instantly) and the code provided, I have identified the root causes. The issue is a combination of **Batch file syntax settings** causing crashes with certain filenames, and likely **PowerShell version mismatches** (since you have PS 7 installed but the script calls PS 5). Here is the diagnosis and the fixed files. ### 🔍 Diagnosis: Why it fails
+
+
+
+1. **The "Flash" / Crash (Batch File):** You are using `setlocal enabledelayedexpansion`. If any file path contains an exclamation mark `!` (common in downloads) or complex characters, the Batch interpreter crashes immediately before reaching the `pause` command. 2. **Argument Passing:** You have PowerShell 7 (`pwsh.exe`) installed, but the batch file calls `PowerShell.exe` (Legacy Windows PowerShell). While usually compatible, specific argument parsing behaviors differ. 3. **Missing Logic:** The PowerShell snippet calls a function `Process-Item`, but that function definition was not included in your snippet. If that function doesn't exist or is defined *after* it is called, the script crashes instantly. 4. **Duplicate Suffixes:** The script blindly appends `.origin.json` without checking if the file is already a manifest or if it already has the suffix. -----
+
+
+
+### 🛠️ Solution Overview
+
+
+
+1. **Fix Batch Files:** Remove `enabledelayedexpansion` to prevent crashes with special characters. Switch to `pwsh.exe` (PowerShell 7) for better performance and to match your environment. Add a "Catch-All" pause wrapper. 2. **Fix PowerShell:** Add `Start-Transcript` to create a log file (so even if the window closes, you can read what happened). Add logic to detect and strip existing suffixes. 3. **Visible Debugging:** Force the window to stay open using `Read-Host` at the end of the PowerShell script as a backup to the Batch pause. -----
+
+
+
+### File 1: Windows "Send To" Wrapper
+
+
+
+**Save as:** `C:\Users\carucci_r\AppData\Roaming\Microsoft\Windows\SendTo\Chunker_MoveOptimized.bat`
+
+
+
+```batch
+
+@echo off
+
+REM Disable delayed expansion to prevent crashes with '!' in filenames
+
+setlocal disabledelayedexpansion
+
+
+
+REM ========================================================
+
+REM CONFIGURATION
+
+REM ========================================================
+
+set "SCRIPT_PATH=C:\_chunker\Chunker_MoveOptimized.ps1"
+
+REM Using pwsh.exe (PowerShell 7) as per your environment
+
+set "PS_EXE=pwsh.exe" 
+
+REM ========================================================
+
+
+
+echo ========================================================
+
+echo   Chunker Move - SendTo Wrapper
+
+echo ========================================================
+
+
+
+REM 1. Validate Script Exists
+
+if not exist "%SCRIPT_PATH%" (
+
+    echo [CRITICAL ERROR] Script not found at:
+
+    echo "%SCRIPT_PATH%"
+
+    echo. pause
+
+    exit /b 1
+
+)
+
+
+
+REM 2. Validate Arguments (Quoted check handles spaces better)
+
+if "%~1"=="" (
+
+    echo [ERROR] No files selected. echo Please select files, Right-Click, and choose Send To. echo. pause
+
+    exit /b 1
+
+)
+
+
+
+REM 3. Execute PowerShell
+
+REM We use " call " to ensure control returns to this batch file
+
+REM We pass %* exactly as received to preserve quoting from Explorer
+
+echo [INFO] Launching PowerShell 7...
+
+echo. call "%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_PATH%" %*
+
+
+
+REM 4. Check Exit Code
+
+set "EXIT_CODE=%ERRORLEVEL%"
+
+
+
+echo. echo ========================================================
+
+if %EXIT_CODE% EQU 0 (
+
+    echo [SUCCESS] Operation completed successfully.
+
+) else (
+
+    echo [ERROR] PowerShell script exited with code: %EXIT_CODE%
+
+)
+
+echo ========================================================
+
+
+
+REM 5. FINAL PAUSE (Cannot be skipped)
+
+echo. echo Press any key to close this window...
+
+pause >nul
+
+```
+
+
+
+### File 2: Directory Opus Button Wrapper
+
+
+
+**Save as:** `C:\_chunker\opus\Chunker_Move.bat`
+
+
+
+```batch
+
+@echo off
+
+setlocal disabledelayedexpansion
+
+
+
+REM ========================================================
+
+REM CONFIGURATION
+
+REM ========================================================
+
+set "SCRIPT_PATH=C:\_chunker\Chunker_MoveOptimized.ps1"
+
+set "PS_EXE=pwsh.exe"
+
+REM ========================================================
+
+
+
+echo ========================================================
+
+echo   Chunker Move - Directory Opus Wrapper
+
+echo ========================================================
+
+
+
+if not exist "%SCRIPT_PATH%" (
+
+    echo [CRITICAL ERROR] Script not found at: "%SCRIPT_PATH%"
+
+    pause
+
+    exit /b 1
+
+)
+
+
+
+if "%~1"=="" (
+
+    echo [ERROR] No files selected in Directory Opus. pause
+
+    exit /b 1
+
+)
+
+
+
+echo [INFO] Processing selected files...
+
+echo. REM Execute PowerShell 7
+
+call "%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_PATH%" %*
+
+
+
+set "EXIT_CODE=%ERRORLEVEL%"
+
+
+
+echo. echo ========================================================
+
+if %EXIT_CODE% EQU 0 (
+
+    echo [SUCCESS] Batch processing complete.
+
+) else (
+
+    echo [ERROR] Errors occurred during processing. Code: %EXIT_CODE%
+
+)
+
+echo ========================================================
+
+
+
+echo Press any key to close this window...
+
+pause >nul
+
+```
+
+
+
+### File 3: The Fixed PowerShell Script
+
+
+
+**Save as:** `C:\_chunker\Chunker_MoveOptimized.ps1`
+
+
+
+I have added the missing `Process-Item` function, implemented the log transcript (saved to a `logs` folder so you can debug later), and fixed the suffix issue. ```powershell
+
+param(
+
+    [Parameter(ValueFromRemainingArguments = $true)]
+
+    [string[]]$Paths
+
+)
+
+
+
+# -----------------------------------------------------------
+
+# CONFIGURATION
+
+# -----------------------------------------------------------
+
+$DestFolder = "C:\_chunker\02_data"
+
+$LogFolder  = "C:\_chunker\logs"
+
+$ErrorActionPreference = "Stop"
+
+
+
+# Ensure directories exist
+
+if (! (Test-Path $DestFolder)) { New-Item -ItemType Directory -Path $DestFolder -Force | Out-Null }
+
+if (! (Test-Path $LogFolder))  { New-Item -ItemType Directory -Path $LogFolder -Force | Out-Null }
+
+
+
+# Start Logging (Captures output to file in case window closes)
+
+$LogFile = Join-Path $LogFolder "Chunker_Log_$(Get-Date -Format 'yyyyMMdd_HHmmss').txt"
+
+Start-Transcript -Path $LogFile -Append
+
+
+
+Write-Host "===============================================" -ForegroundColor White
+
+Write-Host "Chunker Move-Optimized (PowerShell 7)" -ForegroundColor Cyan
+
+Write-Host "===============================================" -ForegroundColor White
+
+Write-Host "Destination: $DestFolder" -ForegroundColor Gray
+
+Write-Host "Log File:    $LogFile" -ForegroundColor Gray
+
+Write-Host ""
+
+
+
+# -----------------------------------------------------------
+
+# FUNCTION DEFINITION
+
+# -----------------------------------------------------------
+
+function Process-Item {
+
+    param (
+
+        [string]$SourcePath
+
+    )
+
+
+
+    try {
+
+        # Check if file exists
+
+        if (-not (Test-Path -LiteralPath $SourcePath -PathType Leaf)) {
+
+            Write-Warning "Skipped (Not a file or not found): $SourcePath"
+
+            return
+
+        }
+
+
+
+        $item = Get-Item -LiteralPath $SourcePath
+
+        
+
+        # 1. Skip if it is already a manifest file
+
+        if ($item.Name -match "\.origin\.json$") {
+
+            Write-Warning "Skipped (Is Manifest): $($item.Name)"
+
+            return
+
+        }
+
+
+
+        # 2. Determine Destination Path
+
+        $destPath = Join-Path -Path $DestFolder -ChildPath $item.Name
+
+
+
+        # 3. Handle Duplicate Suffixes for Manifest
+
+        # Remove existing .origin.json if present (regex replace at end of string)
+
+        $cleanName = $item.Name -replace '\.origin\.json$', ''
+
+        $manifestName = "$cleanName.origin.json"
+
+        $manifestPath = Join-Path -Path $DestFolder -ChildPath $manifestName
+
+
+
+        # 4. Create Manifest Content
+
+        $manifestData = @{
+
+            original_path = $item.FullName
+
+            filename      = $item.Name
+
+            moved_at      = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+
+            source_host   = $env:COMPUTERNAME
+
+        }
+
+
+
+        # 5. Move File
+
+        Move-Item -LiteralPath $item.FullName -Destination $destPath -Force -ErrorAction Stop
+
+        Write-Host "[MOVE] Success: $($item.Name)" -ForegroundColor Green
+
+
+
+        # 6. Write Manifest
+
+        $manifestData | ConvertTo-Json | Set-Content -Path $manifestPath
+
+        Write-Host "[MANIFEST] Created: $manifestName" -ForegroundColor DarkGray
+
+
+
+    }
+
+    catch {
+
+        Write-Error "Failed to process '$SourcePath': $($_.Exception.Message)"
+
+        $script:HadErrors = $true
+
+    }
+
+}
+
+
+
+# -----------------------------------------------------------
+
+# MAIN PROCESSING LOOP
+
+# -----------------------------------------------------------
+
+
+
+# Debug: Show inputs
+
+Write-Host "[DEBUG] Raw Argument Count: $($Paths.Count)" -ForegroundColor Gray
+
+
+
+# If no paths, check if args were passed as a single string (Directory Opus edge case)
+
+if ($Paths.Count -eq 1 -and $Paths[0].Contains(" ")) {
+
+    # Attempt to split if it looks like Opus sent a single block string
+
+    # (Usually Opus sends separate args, but this is a fallback)
+
+    # This logic is risky if filenames contain spaces, but standard handling usually works.
+
+} if (-not $Paths -or $Paths.Count -eq 0) {
+
+    Write-Error "No files provided." Write-Host "Usage: Select files -> Right Click -> Send To -> Chunker Move" -ForegroundColor Yellow
+
+    Stop-Transcript
+
+    exit 1
+
+}
+
+
+
+$script:HadErrors = $false
+
+$processedCount = 0
+
+
+
+foreach ($p in $Paths) {
+
+    # Remove quotes if they somehow got passed in (rare but happens)
+
+    $cleanPath = $p.Trim('"').Trim("'")
+
+    
+
+    if (-not [string]::IsNullOrWhiteSpace($cleanPath)) {
+
+        Write-Host "Processing: $cleanPath" -ForegroundColor White
+
+        Process-Item -SourcePath $cleanPath
+
+        $processedCount++
+
+        Write-Host ""
+
+    }
+
+}
+
+
+
+Write-Host "===============================================" -ForegroundColor White
+
+if ($script:HadErrors) {
+
+    Write-Host "Processing Complete with ERRORS" -ForegroundColor Red
+
+} else {
+
+    Write-Host "Processing Complete" -ForegroundColor Green
+
+}
+
+Write-Host "===============================================" -ForegroundColor White
+
+
+
+Stop-Transcript
+
+
+
+# Optional: Add a pause here in PowerShell as a double-safety
+
+if ($script:HadErrors) {
+
+    Write-Host "Press Enter to exit..."
+
+    [void][System.Console]::ReadLine()
+
+    exit 1
+
+}
+
+
+
+exit 0
+
+```
+
+
+
+### Next Steps for You
+
+
+
+1. **Replace Files:** Overwrite your three existing files with the code above. 2. **Verify PowerShell 7:** Ensure `pwsh.exe` runs in your command prompt. If not, change `set "PS_EXE=pwsh.exe"` in the batch files back to `set "PS_EXE=PowerShell.exe"`. 3. **Check Logs:** If the window *still* closes instantly (which is unlikely with these fixes), navigate to `C:\_chunker\logs`. A text file there will contain the exact error message. Would you like me to explain how to set up the Directory Opus button specifically to ensure it handles spaces correctly with this new script? ---
+
+**Cursor**
+
+Applying Gemini's fixes while preserving existing functionality. Implementing the changes:
+
+
+Applying Gemini's fixes while preserving existing functionality (HMAC, OneDrive cleanup, manifest details). Implementing the improvements:
+
+
+```bat
+@echo off
+REM Disable delayed expansion to prevent crashes with '!' in filenames
+setlocal disabledelayedexpansion
+
+REM ========================================================
+REM CONFIGURATION
+REM ========================================================
+set "SCRIPT_PATH=C:\_chunker\Chunker_MoveOptimized.ps1"
+REM Using pwsh.exe (PowerShell 7) as per your environment
+set "PS_EXE=pwsh.exe"
+REM ========================================================
+
+echo ========================================================
+echo   Chunker Move - SendTo Wrapper
+echo ========================================================
+
+REM 1. Validate Script Exists
+if not exist "%SCRIPT_PATH%" (
+    echo [CRITICAL ERROR] Script not found at:
+    echo "%SCRIPT_PATH%"
+    echo. pause
+    exit /b 1
+)
+
+REM 2. Validate Arguments (Quoted check handles spaces better)
+if "%~1"=="" (
+    echo [ERROR] No files selected. echo Please select files, Right-Click, and choose Send To. echo. pause
+    exit /b 1
+)
+
+REM 3. Execute PowerShell
+REM We use " call " to ensure control returns to this batch file
+REM We pass %* exactly as received to preserve quoting from Explorer
+echo [INFO] Launching PowerShell 7...
+echo. call "%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_PATH%" %*
+
+REM 4. Check Exit Code
+set "EXIT_CODE=%ERRORLEVEL%"
+
+echo. echo ========================================================
+if %EXIT_CODE% EQU 0 (
+    echo [SUCCESS] Operation completed successfully.
+) else (
+    echo [ERROR] PowerShell script exited with code: %EXIT_CODE%
+)
+echo ========================================================
+
+REM 5. FINAL PAUSE (Cannot be skipped)
+echo. echo Press any key to close this window...
+pause >nul
+
+endlocal
+exit /b %EXIT_CODE%
+
+```
+
+```bat
+@echo off
+setlocal disabledelayedexpansion
+
+REM ========================================================
+REM CONFIGURATION
+REM ========================================================
+set "SCRIPT_PATH=C:\_chunker\Chunker_MoveOptimized.ps1"
+set "PS_EXE=pwsh.exe"
+REM ========================================================
+
+echo ========================================================
+echo   Chunker Move - Directory Opus Wrapper
+echo ========================================================
+
+if not exist "%SCRIPT_PATH%" (
+    echo [CRITICAL ERROR] Script not found at: "%SCRIPT_PATH%"
+    pause
+    exit /b 1
+)
+
+if "%~1"=="" (
+    echo [ERROR] No files selected in Directory Opus. pause
+    exit /b 1
+)
+
+echo [INFO] Processing selected files...
+echo. REM Execute PowerShell 7
+call "%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_PATH%" %*
+
+set "EXIT_CODE=%ERRORLEVEL%"
+
+echo. echo ========================================================
+if %EXIT_CODE% EQU 0 (
+    echo [SUCCESS] Batch processing complete.
+) else (
+    echo [ERROR] Errors occurred during processing. Code: %EXIT_CODE%
+)
+echo ========================================================
+
+echo Press any key to close this window...
+pause >nul
+
+endlocal
+exit /b %EXIT_CODE%
+
+```
+
+```powershell
+# Send to Chunker - OPTIMIZED VERSION (Move-Based Workflow)
+# Moves files/folders from OneDrive to chunker watch folder with origin manifest
+# Reduces storage bloat and OneDrive sync overhead by 50%+
+
+param(
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]$Paths
+)
+
+$ErrorActionPreference = 'Continue'
+$script:HadErrors = $false
+$DestFolder = "C:\_chunker\02_data"
+$KeyFile = "C:\_chunker\06_config\manifest_hmac.key"
+$LogFolder = "C:\_chunker\logs"
+
+# Start Transcript Logging (Captures output to file even if window closes)
+if (-not (Test-Path $LogFolder)) {
+    New-Item -ItemType Directory -Path $LogFolder -Force | Out-Null
+}
+$LogFile = Join-Path $LogFolder "Chunker_Move_$(Get-Date -Format 'yyyyMMdd_HHmmss').txt"
+try {
+    Start-Transcript -Path $LogFile -Append -ErrorAction SilentlyContinue
+} catch {
+    # Transcript may fail in some contexts, continue without it
+}
+
+# Ensure destination exists
+if (-not (Test-Path $DestFolder)) {
+    New-Item -ItemType Directory -Path $DestFolder -Force | Out-Null
+}
+
+# Load HMAC key if present
+$HmacKey = $null
+if (Test-Path $KeyFile) {
+    try {
+        $HmacKey = [System.IO.File]::ReadAllBytes($KeyFile)
+    }
+    catch {
+        Write-Warning "Failed to load HMAC key: $_"
+    }
+}
+
+function Get-FileSHA256 {
+    param([string]$Path)
+    try {
+        $hash = Get-FileHash -Path $Path -Algorithm SHA256
+        return $hash.Hash.ToLower()
+    }
+    catch {
+        return $null
+    }
+}
+
+function Get-HMACSHA256 {
+    param(
+        [byte[]]$Key,
+        [byte[]]$Data
+    )
+    try {
+        $hmac = New-Object System.Security.Cryptography.HMACSHA256
+        $hmac.Key = $Key
+        $hashBytes = $hmac.ComputeHash($Data)
+        return [System.BitConverter]::ToString($hashBytes).Replace('-', '').ToLower()
+    }
+    catch {
+        return $null
+    }
+    finally {
+        if ($hmac) { $hmac.Dispose() }
+    }
+}
+
+function Process-File {
+    param(
+        [string]$SourcePath,
+        [string]$DestPath
+    )
+
+    if (-not (Test-Path $SourcePath)) {
+        Write-Warning "Source file not found: $SourcePath"
+        return
+    }
+
+    # Skip if source file is already a manifest file (should be caught earlier, but double-check)
+    if ($SourcePath -like "*.origin.json") {
+        Write-Warning "Skipping manifest file: $SourcePath"
+        return
+    }
+
+    $destDir = Split-Path $DestPath -Parent
+    if (-not (Test-Path $destDir)) {
+        New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+    }
+
+    # Get file info BEFORE move/copy
+    $fileInfo = Get-Item $SourcePath
+    
+    # Strip any existing .origin.json suffix from the destination filename
+    # to prevent cascading .origin.json.origin.json issues
+    $destName = [System.IO.Path]::GetFileName($DestPath)
+    while ($destName -like "*.origin.json") {
+        $destName = $destName -replace '\.origin\.json$', ''
+    }
+    if ($destName -ne [System.IO.Path]::GetFileName($DestPath)) {
+        $DestPath = Join-Path (Split-Path $DestPath -Parent) $destName
+    }
+    
+    $sha256 = Get-FileSHA256 -Path $SourcePath
+
+    # Get original filename without any .origin.json suffix for manifest
+    $originalName = $fileInfo.Name
+    while ($originalName -like "*.origin.json") {
+        $originalName = $originalName -replace '\.origin\.json$', ''
+    }
+
+    # Create manifest BEFORE moving file
+    $manifest = @{
+        original_full_path = $fileInfo.FullName
+        original_directory = $fileInfo.DirectoryName
+        original_filename  = $originalName
+        sent_at            = (Get-Date).ToUniversalTime().ToString("o")
+        integrity_sha256   = $sha256
+        size_bytes         = $fileInfo.Length
+        modified_time      = $fileInfo.LastWriteTimeUtc.ToString("o")
+        created_time       = $fileInfo.CreationTimeUtc.ToString("o")
+        operation          = "MOVE"
+        source_cleanup     = "pending"
+    }
+
+    # Try to MOVE file (primary operation)
+    $moveSuccess = $false
+    try {
+        Move-Item -Path $SourcePath -Destination $DestPath -Force -ErrorAction Stop
+        $moveSuccess = $true
+        Write-Host "[MOVE] Successfully moved: $($fileInfo.Name)" -ForegroundColor Green
+
+        # Guard against OneDrive or sync clients restoring the original file immediately after move
+        Start-Sleep -Milliseconds 300
+        if (Test-Path $SourcePath) {
+            try {
+                Remove-Item -Path $SourcePath -Force -ErrorAction Stop
+                Write-Host "[CLEANUP] Removed residual source copy: $($fileInfo.Name)" -ForegroundColor DarkYellow
+                $manifest.source_cleanup = "removed_residual_copy"
+            }
+            catch {
+                Write-Warning "Residual source copy could not be removed for $($fileInfo.Name): $_"
+                $manifest.source_cleanup = "cleanup_failed"
+                $manifest.source_cleanup_error = $_.ToString()
+                $script:HadErrors = $true
+            }
+        }
+        else {
+            $manifest.source_cleanup = "not_required"
+        }
+    }
+    catch {
+        $moveError = $_
+        # Fallback to COPY if MOVE fails
+        Write-Warning "MOVE failed for $($fileInfo.Name): $moveError"
+        Write-Warning "Falling back to COPY operation"
+        $manifest.operation = "COPY_FALLBACK"
+        $manifest.move_error = $moveError.ToString()
+        
+        try {
+            Copy-Item -Path $SourcePath -Destination $DestPath -Force -ErrorAction Stop
+            Write-Host "[COPY] Used fallback for: $($fileInfo.Name)" -ForegroundColor Yellow
+            
+            # Update manifest to reflect we're using original file
+            $manifest.fallback_reason = $moveError.ToString()
+
+            Start-Sleep -Milliseconds 300
+            if (Test-Path $SourcePath) {
+                try {
+                    Remove-Item -Path $SourcePath -Force -ErrorAction Stop
+                    Write-Host "[CLEANUP] Removed source after copy fallback: $($fileInfo.Name)" -ForegroundColor DarkYellow
+                    $manifest.source_cleanup = "removed_after_copy"
+                }
+                catch {
+                    Write-Warning "Failed to remove source after copy fallback for $($fileInfo.Name): $_"
+                    $manifest.source_cleanup = "cleanup_failed_after_copy"
+                    $manifest.source_cleanup_error = $_.ToString()
+                    $script:HadErrors = $true
+                }
+            }
+            else {
+                $manifest.source_cleanup = "not_found_after_copy"
+            }
+        }
+        catch {
+            Write-Warning "Both MOVE and COPY failed for $SourcePath : $_"
+            $manifest.operation = "FAILED"
+            $manifest.copy_error = $_.ToString()
+            $script:HadErrors = $true
+            return
+        }
+    }
+
+    if (Test-Path $DestPath) {
+        $manifest.destination_status = "present"
+    }
+    else {
+        Write-Warning "Destination missing after operation for $($fileInfo.Name)"
+        $manifest.destination_status = "missing"
+        $script:HadErrors = $true
+    }
+
+    if (Test-Path $SourcePath) {
+        Write-Warning "Source still present after operation for $($fileInfo.Name)"
+        if ($manifest.source_cleanup -eq "pending") {
+            $manifest.source_cleanup = "source_still_present"
+        }
+        $script:HadErrors = $true
+    }
+    elseif ($manifest.source_cleanup -eq "pending") {
+        $manifest.source_cleanup = "cleared"
+    }
+
+    # Write manifest (regardless of MOVE/COPY)
+    try {
+        $manifestPath = "$DestPath.origin.json"
+        if (-not $manifest.ContainsKey('source_cleanup')) {
+            $manifest.source_cleanup = "not_applicable"
+        }
+        $manifestJson = $manifest | ConvertTo-Json -Depth 10
+        
+        [System.IO.File]::WriteAllText($manifestPath, $manifestJson, [System.Text.Encoding]::UTF8)
+        Write-Host "[MANIFEST] Created: $($fileInfo.Name).origin.json" -ForegroundColor Cyan
+    }
+    catch {
+        Write-Warning "Failed to create manifest for $SourcePath : $_"
+    }
+
+    # Add HMAC if key present
+    if ($HmacKey) {
+        try {
+            $fileBytes = [System.IO.File]::ReadAllBytes($DestPath)
+            $manifestBytes = [System.Text.Encoding]::UTF8.GetBytes($manifestJson)
+            $combinedBytes = $fileBytes + $manifestBytes
+            $hmacHash = Get-HMACSHA256 -Key $HmacKey -Data $combinedBytes
+
+            if ($hmacHash) {
+                $manifest.hmac_sha256 = $hmacHash
+                $manifestJson = $manifest | ConvertTo-Json -Depth 10
+                [System.IO.File]::WriteAllText($manifestPath, $manifestJson, [System.Text.Encoding]::UTF8)
+                Write-Host "[HMAC] Added integrity check" -ForegroundColor Magenta
+            }
+        }
+        catch {
+            Write-Warning "Failed to compute HMAC for $($fileInfo.Name): $_"
+        }
+    }
+}
+
+function Process-Item {
+    param(
+        [string]$Path
+    )
+
+    if (-not (Test-Path $Path)) {
+        Write-Warning "Path not found: $Path"
+        return
+    }
+
+    # Skip manifest files entirely - they should never be processed
+    if ($Path -like "*.origin.json") {
+        Write-Warning "Skipping manifest file: $Path"
+        return
+    }
+
+    $item = Get-Item $Path
+
+    if ($item.PSIsContainer) {
+        # Process folder recursively - skip manifest files
+        Write-Host "[FOLDER] Processing recursively: $($item.Name)" -ForegroundColor Blue
+        $files = Get-ChildItem -Path $Path -File -Recurse | Where-Object { $_.Name -notlike "*.origin.json" }
+        foreach ($file in $files) {
+            $relativePath = $file.FullName.Substring($Path.Length).TrimStart('\')
+            $destPath = Join-Path $DestFolder $relativePath
+            Process-File -SourcePath $file.FullName -DestPath $destPath
+        }
+    }
+    else {
+        # Process single file - strip .origin.json suffix if present in filename
+        $baseName = $item.Name
+        while ($baseName -like "*.origin.json") {
+            $baseName = $baseName -replace '\.origin\.json$', ''
+        }
+        $destPath = Join-Path $DestFolder $baseName
+        Process-File -SourcePath $item.FullName -DestPath $destPath
+    }
+}
+
+# Process all input paths
+Write-Host "===============================================" -ForegroundColor White
+Write-Host "Chunker Move-Optimized SendTo Script" -ForegroundColor White
+Write-Host "===============================================" -ForegroundColor White
+Write-Host "Destination: $DestFolder" -ForegroundColor Cyan
+Write-Host ""
+
+# Debug: Show what we received
+Write-Host "[DEBUG] Arguments received: $($Paths.Count) path(s)" -ForegroundColor Gray
+if ($Paths -and $Paths.Count -gt 0) {
+    foreach ($p in $Paths) {
+        Write-Host "[DEBUG]   - $p" -ForegroundColor Gray
+    }
+} else {
+    Write-Host "[DEBUG]   - No paths received (Paths is null or empty)" -ForegroundColor Yellow
+}
+
+Write-Host ""
+
+# Check if any paths were provided
+if (-not $Paths -or $Paths.Count -eq 0) {
+    Write-Error "ERROR: No files or folders were provided to process." Write-Host ""
+    Write-Host "Usage:" -ForegroundColor Yellow
+    Write-Host "  1. Select files/folders in Windows Explorer" -ForegroundColor Yellow
+    Write-Host "  2. Right-click -> Send To -> Chunker Move-Optimized" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "OR" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "  1. Select files in Directory Opus" -ForegroundColor Yellow
+    Write-Host "  2. Click the Chunker Move button" -ForegroundColor Yellow
+    Write-Host ""
+    exit 1
+}
+
+Write-Host "Processing $($Paths.Count) item(s)..." -ForegroundColor Yellow
+Write-Host ""
+
+$processedCount = 0
+foreach ($path in $Paths) {
+    if ($path -and $path.Trim()) {
+        Write-Host "Processing: $path" -ForegroundColor White
+        Process-Item -Path $path.Trim()
+        $processedCount++
+        Write-Host ""
+    }
+}
+
+if ($processedCount -eq 0) {
+    Write-Warning "No valid paths were processed. All paths may have been empty or invalid."
