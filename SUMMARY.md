@@ -1,135 +1,203 @@
-# Summary (current state)
+# Standards Repository - Project Summary
 
-## Repository Structure (v2.0.0)
-
-This repository contains a single `.git/` at the root level. The `unified_data_dictionary/` folder is integrated as a normal directory (not a submodule).
-
-### Canonical Locations
-
-| Schema Type | Location |
-|-------------|----------|
-| CAD field definitions | `CAD/DataDictionary/current/schema/` |
-| RMS field definitions | `RMS/DataDictionary/current/schema/` |
-| Cross-system mappings | `CAD_RMS/DataDictionary/current/schema/` |
-
-### Archive
-
-The `archive/` directory contains:
-- `packages/` - Packaging artifacts (Standards.7z)
-- `legacy_copies/` - Old file versions for reference
-- `removed_duplicates/` - Duplicate files removed during cleanup
-
-See `archive/README.md` for retention policy (30 days after merge).
-
-### Chatlog Storage
-
-Chatlogs are stored in `unified_data_dictionary/docs/chatlogs/`:
-- `chunked/<chunk_id>/` - Direct flat structure
-- Each chunk contains: `*_transcript.json`, `*_transcript.md`, `*_sidecar.json`, `*.origin.json`
+**Date**: 2026-01-16  
+**Version**: v2.1.0 (pre-flight complete)  
+**Status**: 🟡 Migration Planning Phase - Ready to Execute
 
 ---
 
-## What exists now
+## Current State
 
-- **CAD**
-  - `CAD/DataDictionary/current/schema/` contains:
-    - `cad_export_field_definitions.md` (Draft v1.0 - finalized 2025-12-30) - Comprehensive CAD export field definitions and validation rules
-- **RMS**
-  - `RMS/DataDictionary/` scaffolding exists (schema/domains/defaults + archive/templates/scripts)
-  - `rms_export_field_definitions.md` - Comprehensive field definitions (29 fields, 8 groups)
-- **Cross-system**
-  - `CAD_RMS/DataDictionary/current/schema/` contains:
-    - `cad_to_rms_field_map.json`
-    - `rms_to_cad_field_map.json`
-    - `multi_column_matching_strategy.md`
-    - `rms_export_field_definitions.md` (root-level comprehensive documentation)
-- **Call Type Classification**
-  - `docs/call_type_category_mapping.md` - Complete Call Type to Category Type documentation
-  - `mappings/call_type_category_mapping.json` - JSON lookup for programmatic access
-  - `mappings/call_types_*.csv` - 11 category-specific CSV files for targeted loading
-  - Primary reference: `09_Reference/Classifications/CallTypes/CallType_Categories.csv` (649 entries, with Incident_Norm column, 11 ESRI standard categories only) - **Single Source of Truth**
-- **ETL Configuration**
-  - `config/response_time_filters.json` - Response Time ETL filtering rules (How Reported, Category_Type, incident exclusions, inclusion overrides)
+### Repository Structure
+- **CAD/RMS/CAD_RMS DataDictionaries**: Established canonical locations for schemas and cross-system mappings
+- **unified_data_dictionary**: Python tool for schema extraction and data dictionary generation (migration pending)
+- **Configuration**: ETL filters (`config/response_time_filters.json`) and classification mappings
+- **Documentation**: Comprehensive field definitions, mapping strategies, and call type classifications
 
-## Notes
+### Recent Activity (2026-01-16)
 
-- Cross-system field maps are located in the canonical cross-system location:
-  - `CAD_RMS/DataDictionary/current/schema/` (v2.0 enhanced mappings with multi-column matching strategies)
-  - CAD directory contains only CAD-specific schema files (cross-system mappings removed 2025-12-30 for clarity)
+**Pre-Flight Assessment Complete** ✅
 
-- A bootstrap script is available at:
-  - `CAD_RMS/DataDictionary/scripts/init_cad_rms_standards.ps1`
+**Validation Results**:
+- ✅ UDD tool tested: `pip install`, CLI, and pytest all pass
+- ✅ Python package structure: Sound, no breaking changes
+- ✅ Backup created: **139,390 files** at `C:\Temp\Standards_Backup_20260116_181122`
+- ✅ Git: Clean status, migration branch created (`feature/udd-hybrid-migration`)
+- ⚠️ External dependencies: Confirmed (Power BI, ETL scripts reference UDD paths)
 
-- Root + per-DataDictionary documentation exists:
-  - Root: `README.md`, `SUMMARY.md`, `CHANGELOG.md`
-  - Per DataDictionary: `*/DataDictionary/{README.md,SUMMARY.md,CHANGELOG.md}`
+**Risk Assessment**:
+- 15 potential blind spots identified and analyzed
+- External system dependencies = highest risk
+- Mitigation: Symbolic links strategy (zero-downtime)
+- Status: **CONDITIONAL GO** with recommended approach
 
-- This folder is a local Git repo:
-  - Single `.git/` at repository root
-  - `.gitignore` present
-  - `unified_data_dictionary/` is integrated (no nested repo)
+**Documentation Created**:
+- 17 migration planning documents in `docs/merge/`
+- Pre-flight checklist with automated validation
+- Critical risk analysis and mitigation strategies
+- External dependency tracking templates
+- Three migration strategy options (symbolic links recommended)
 
-## Recent Enhancements
+---
 
-### 🚀 Response Time Filter Configuration v1.2.2 (2026-01-14)
+## Upcoming Changes
 
-**ETL Configuration Added**
-- New `config/` directory created for ETL configuration files
-- Added `config/response_time_filters.json` - JSON configuration for Response Time ETL filtering rules
-- Used by Response Time Monthly Generator script (v2.0.0)
-- Configuration includes:
-  - How Reported exclusions (Self-Initiated)
-  - Category_Type exclusions (4 categories)
-  - Specific incident exclusions (41 incidents)
-  - Inclusion overrides (14 incidents kept despite category exclusion)
+**UDD Hybrid Migration** (Next Phase - Ready to Execute)
 
-### 🚀 Call Type to Category Type Mapping v1.2.1 (2026-01-09)
+**What Will Change**:
+1. Move UDD Python package → `tools/unified_data_dictionary/` (keeps tool functional)
+2. Extract reference data → Root-level `schemas/udd/`, `mappings/field_mappings/`, `templates/udd/`
+3. Organize scripts → `scripts/validation/`, `scripts/extraction/`, `scripts/processing/`
+4. Create symbolic links at old locations (external systems work unchanged)
 
-**Backup Strategy Added**
-- Timestamped backups created automatically in both CallTypes directory and Standards directory
-- Backup script available: `scripts/backup_calltype_categories.py`
-- "Latest" copy maintained in Standards directory for quick access
+**Benefits**:
+- Cleaner root structure
+- Reference data at top level
+- UDD tool preserved and functional
+- NIBRS content can be added to root easily
+- Zero downtime for external systems
 
-### 🚀 Call Type to Category Type Mapping v1.2.0 (2026-01-08)
+**Strategy**: Option 3 - Symbolic Links ⭐
+- Time: 2-3 hours migration + gradual updates
+- Risk: LOW
+- Downtime: ZERO
+- External systems continue working via symlinks
+- Update systems gradually over weeks (no pressure)
 
-**Category Standardization Complete**
-- All categories standardized to 11 ESRI standard categories only
-- Non-standard categories mapped to ESRI equivalents
-- Added 9 remaining unmatched types (total now 649 entries)
+---
 
-### 🚀 Call Type to Category Type Mapping v1.0 (2026-01-08)
+## Documentation
 
-**Call Type Classification System - Added**
-- **Primary Reference File**: `CallType_Categories.csv` (649 entries) - ESRI standardized classification - **Single Source of Truth**
-  - Location: `09_Reference/Classifications/CallTypes/CallType_Categories.csv`
-  - Format: Incident, Incident_Norm, Category_Type, Response_Type
-  - Includes Incident_Norm column for normalized matching
-  - E.D.P. variations (E.D.P., EDP, edp, etc.) all map to "Mental Health Incident"
-  - **11 ESRI Standard Categories Only**: All non-standard categories have been mapped to ESRI standard
-  - 11 standardized categories (Administrative and Support, Assistance and Mutual Aid, Community Engagement, Criminal Incidents, Emergency Response, Investigations and Follow-Ups, Juvenile-Related Incidents, Public Safety and Welfare, Regulatory and Ordinance, Special Operations and Tactical, Traffic and Motor Vehicle)
-  - 3 Response Types (Emergency, Urgent, Routine)
-- **Documentation**: `docs/call_type_category_mapping.md` - Complete breakdown of all Call Types by Category Type
-- **Category-Specific Files**: 11 CSV files in `mappings/call_types_*.csv` for targeted script loading
-- **JSON Mapping**: `mappings/call_type_category_mapping.json` - Programmatic lookup dictionaries
-  - `call_type_to_category`: Quick category lookup
-  - `call_type_to_response`: Response type lookup
-  - `category_to_call_types`: All call types per category
-- **Purpose**: Streamline knowledge base with script-referenceable files for RMS Incident Type classification and filtering
+### Migration Planning
+**Location**: `docs/merge/README.md`
 
-### 🚀 Schema Documentation v0.3.0 (2025-12-30)
+**Key Documents**:
+- **PRE-FLIGHT-CHECKLIST.md** - Mandatory checks (all completed ✅)
+- **CRITICAL-BLIND-SPOTS.md** - 15 risk areas identified
+- **EXTERNAL-DEPENDENCIES-TRACKING.md** - System update procedures
+- **05-UDD-Hybrid-Migration-REVISED.md** - Ready-to-execute migration script
+- **MIGRATION-STATUS-CURRENT.md** - Real-time status
+- **QUICK-REFERENCE.md** - 2-minute overview
 
-**CAD Export Field Definitions - Finalized (Draft v1.0)**
-- Comprehensive CAD export field definitions and validation rules
-- Field-by-field documentation with export header to standard name mapping
-- Validation rules, formats, and allowed values for all CAD export fields (ReportNumberNew, Incident, HowReported, temporal fields, location fields, etc.)
-- Temporal field derivation logic and standard naming conventions
-- Cross-referenced with RMS field definitions for integration
+### Field Definitions
+- **CAD**: `CAD/DataDictionary/current/schema/cad_export_field_definitions.md`
+- **RMS**: `RMS/DataDictionary/current/schema/rms_export_field_definitions.md` (29 fields, 8 functional groups)
 
-**RMS Export Field Definitions - Added (v1.0)**
-- Comprehensive RMS export schema documentation
-  - 29 documented fields across 8 functional categories
-  - Groups: Incident Identification, Temporal, Incident Classification, Location, Incident Details, Property, Vehicle, Personnel, Case Management
-  - Each field includes validation rules, format patterns, CAD mapping references, and multi-column matching strategy usage
-  - Special narrative extraction logic for deriving suspect descriptions, vehicle details, property information, and M.O.
-  - Integrated with `rms_to_cad_field_map_v2_enhanced.json` and multi-column matching strategies
-  - Data quality validation rules summary organized by field group
+### Cross-System Mapping
+- **CAD→RMS**: `CAD_RMS/DataDictionary/current/schema/cad_to_rms_field_map.json` (v2.0)
+- **RMS→CAD**: `CAD_RMS/DataDictionary/current/schema/rms_to_cad_field_map.json` (v2.0)
+- **Strategy Guide**: `CAD_RMS/DataDictionary/current/schema/multi_column_matching_strategy.md`
+
+### Classifications
+- **Call Type Mapping**: `docs/call_type_category_mapping.md` (649 call types, 11 ESRI categories)
+
+---
+
+## Version History
+
+| Version | Date | Description |
+|---------|------|-------------|
+| **v2.1.0** | 2026-01-16 | Pre-flight documentation and assessment for UDD migration |
+| **v2.0.0** | 2026-01-15 | Repository restructuring, archive creation, UDD integration |
+| **v1.2.2** | 2026-01-14 | Response time filter configuration |
+| **v1.2.1** | 2026-01-09 | CallType backup strategy |
+| **v1.2.0** | 2026-01-08 | ESRI category standardization (11 categories) |
+| **v1.1.0** | 2026-01-08 | Call type mapping system enhancements |
+| **v1.0.0** | 2026-01-08 | Call type classification system (516 entries) |
+| **v0.3.0** | 2025-12-30 | RMS field definitions |
+
+---
+
+## Key Files & Locations
+
+### Documentation
+| File | Location | Purpose |
+|------|----------|---------|
+| **README.md** | Root | Repository overview with migration status |
+| **CHANGELOG.md** | Root | Complete version history |
+| **SUMMARY.md** | Root | This file - project summary |
+| **MERGE-STATUS.md** | Root | Quick migration status pointer |
+
+### Migration Planning
+| File | Location | Purpose |
+|------|----------|---------|
+| **Migration Docs** | `docs/merge/` | Complete migration suite (17 docs) |
+| **Pre-Flight Results** | `docs/merge/PRE-FLIGHT-RESULTS.md` | Assessment results |
+| **Current Status** | `docs/merge/MIGRATION-STATUS-CURRENT.md` | Real-time status |
+| **Quick Reference** | `docs/merge/QUICK-REFERENCE.md` | 2-min overview |
+
+### Schemas & Mappings
+| File | Location | Purpose |
+|------|----------|---------|
+| **CAD→RMS Map** | `CAD_RMS/DataDictionary/current/schema/` | Cross-system field mapping (v2.0) |
+| **RMS Definitions** | `RMS/DataDictionary/current/schema/` | 29 RMS field definitions |
+| **CAD Definitions** | `CAD/DataDictionary/current/schema/` | CAD field definitions |
+
+---
+
+## Statistics
+
+### Repository Metrics
+- **Total Files**: 139,390+ (as of backup)
+- **Documentation Files**: 17+ in migration suite
+- **Schemas**: CAD, RMS, CAD_RMS cross-system
+- **Call Type Mappings**: 649 entries across 11 categories
+- **RMS Fields Documented**: 29 fields in 8 functional groups
+
+### Migration Preparation
+- **Pre-Flight Checks**: 10/10 completed ✅
+- **Risk Areas Identified**: 15
+- **Mitigation Strategies**: 3 options (1 recommended)
+- **Backup Size**: 139,390 files
+- **Estimated Migration Time**: 2-3 hours
+- **Estimated Update Time**: 5-6 hours (gradual over weeks)
+
+---
+
+## Next Steps
+
+### Immediate (Before Migration)
+1. ⬜ Document external dependencies (Power BI, ETL scripts)
+2. ⬜ Pause OneDrive sync
+3. ⬜ Final GO/NO-GO decision
+
+### Migration Day (If GO)
+1. ⬜ Execute migration script (15-20 min)
+2. ⬜ Create symbolic links (5 min)
+3. ⬜ Test UDD tool in new location (30 min)
+4. ⬜ Verify external systems work via symlinks (30 min)
+5. ⬜ Git commit migration (30 min)
+6. ⬜ Resume OneDrive (2 min)
+
+### Post-Migration (Gradual)
+1. ⬜ Update Power BI reports (1-2 hours, over time)
+2. ⬜ Update ETL scripts (1-2 hours, over time)
+3. ⬜ Update scheduled tasks (30 min)
+4. ⬜ Update documentation references (30 min)
+5. ⬜ Remove symbolic links (optional, after all systems updated)
+
+---
+
+## Contact & Maintenance
+
+**Maintainer**: R. A. Carucci  
+**Repository**: Standards (Hackensack Police Department)  
+**Last Updated**: 2026-01-16  
+**Next Milestone**: UDD hybrid migration execution
+
+---
+
+## Quick Links
+
+- **Migration Status**: `docs/merge/MIGRATION-STATUS-CURRENT.md`
+- **Pre-Flight Results**: `docs/merge/PRE-FLIGHT-RESULTS.md`
+- **Risk Assessment**: `docs/merge/CRITICAL-BLIND-SPOTS.md`
+- **Migration Script**: `docs/merge/05-UDD-Hybrid-Migration-REVISED.md`
+- **Quick Reference**: `docs/merge/QUICK-REFERENCE.md`
+
+---
+
+**Status**: 🟡 PRE-FLIGHT COMPLETE - AWAITING FINAL GO DECISION  
+**Branch**: feature/udd-hybrid-migration  
+**Backup**: ✅ Verified (139,390 files)  
+**Recommendation**: Proceed with symbolic links strategy
