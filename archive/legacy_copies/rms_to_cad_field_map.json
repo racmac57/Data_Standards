@@ -1,0 +1,259 @@
+{
+  "_schema_reference": "See rms_export_field_definitions.md (v1.0 - 2025-12-30) for full field metadata, validation rules, and match logic",
+  "schema_version": "2.0",
+  "generated_on": "2025-12-30",
+  "direction": "rms_to_cad",
+  "description": "Enhanced RMS-to-CAD mapping with multi-column matching support",
+  "join_keys": {
+    "primary": {
+      "cad_internal_field_name": "ReportNumberNew",
+      "cad_source_field_name": "ReportNumberNew",
+      "rms_internal_field_name": "CaseNumber",
+      "rms_source_field_name": "Case Number",
+      "key_normalization": {
+        "trim": true,
+        "collapse_internal_whitespace": true,
+        "remove_nonprinting": true,
+        "case_sensitive": false,
+        "uppercase": false
+      }
+    },
+    "alternative_matching_strategies": [
+      {
+        "strategy_name": "temporal_address_match",
+        "description": "Match on incident date/time plus address when primary key fails",
+        "confidence_threshold": 0.85,
+        "required_fields": {
+          "cad": ["TimeofCall", "FullAddress2"],
+          "rms": ["IncidentDate", "IncidentTime", "FullAddress"]
+        },
+        "matching_rules": [
+          {
+            "field_pair": {
+              "cad": "TimeofCall",
+              "rms": "IncidentDate"
+            },
+            "tolerance": "same_day",
+            "weight": 0.4
+          },
+          {
+            "field_pair": {
+              "cad": "TimeofCall",
+              "rms": "IncidentTime"
+            },
+            "tolerance": "within_1_hour",
+            "weight": 0.3
+          },
+          {
+            "field_pair": {
+              "cad": "FullAddress2",
+              "rms": "FullAddress"
+            },
+            "similarity": "fuzzy_string_match",
+            "threshold": 0.85,
+            "weight": 0.3
+          }
+        ]
+      },
+      {
+        "strategy_name": "officer_temporal_match",
+        "description": "Match on officer plus date/time when primary key fails",
+        "confidence_threshold": 0.80,
+        "required_fields": {
+          "cad": ["Officer", "TimeofCall"],
+          "rms": ["OfficerOfRecord", "IncidentDate", "IncidentTime"]
+        },
+        "matching_rules": [
+          {
+            "field_pair": {
+              "cad": "Officer",
+              "rms": "OfficerOfRecord"
+            },
+            "similarity": "normalized_officer_match",
+            "weight": 0.5
+          },
+          {
+            "field_pair": {
+              "cad": "TimeofCall",
+              "rms": "IncidentDate"
+            },
+            "tolerance": "same_day",
+            "weight": 0.3
+          },
+          {
+            "field_pair": {
+              "cad": "TimeofCall",
+              "rms": "IncidentTime"
+            },
+            "tolerance": "within_2_hours",
+            "weight": 0.2
+          }
+        ]
+      },
+      {
+        "strategy_name": "address_zone_match",
+        "description": "Match on address plus zone plus approximate date when primary key fails",
+        "confidence_threshold": 0.75,
+        "required_fields": {
+          "cad": ["FullAddress2", "ZoneCalc"],
+          "rms": ["FullAddress", "Zone"]
+        },
+        "optional_fields": {
+          "cad": ["TimeofCall"],
+          "rms": ["IncidentDate"]
+        },
+        "matching_rules": [
+          {
+            "field_pair": {
+              "cad": "FullAddress2",
+              "rms": "FullAddress"
+            },
+            "similarity": "fuzzy_string_match",
+            "threshold": 0.90,
+            "weight": 0.3
+          },
+          {
+            "field_pair": {
+              "cad": "ZoneCalc",
+              "rms": "Zone"
+            },
+            "exact_match": true,
+            "weight": 0.3
+          },
+          {
+            "field_pair": {
+              "cad": "TimeofCall",
+              "rms": "IncidentDate"
+            },
+            "tolerance": "within_7_days",
+            "weight": 0.2,
+            "optional": true
+          }
+        ]
+      }
+    ]
+  },
+  "mappings": [
+    {
+      "rms": {
+        "internal_field_name": "CaseNumber",
+        "source_field_name": "Case Number"
+      },
+      "cad": {
+        "internal_field_name": "ReportNumberNew",
+        "source_field_name": "ReportNumberNew"
+      },
+      "priority": 1,
+      "notes": "Primary join key"
+    },
+    {
+      "rms": {
+        "internal_field_name": "IncidentType1",
+        "source_field_name": "Incident Type_1"
+      },
+      "cad": {
+        "internal_field_name": "Incident",
+        "source_field_name": "Incident"
+      },
+      "priority": 1,
+      "update_when": "cad_null_or_blank",
+      "accept_when": "rms_not_null_or_blank",
+      "notes": "Backfill order: Type_1 then Type_2 then Type_3 (priority 1)"
+    },
+    {
+      "rms": {
+        "internal_field_name": "IncidentType2",
+        "source_field_name": "Incident Type_2"
+      },
+      "cad": {
+        "internal_field_name": "Incident",
+        "source_field_name": "Incident"
+      },
+      "priority": 2,
+      "update_when": "cad_null_or_blank",
+      "accept_when": "rms_not_null_or_blank",
+      "notes": "Backfill order: Type_1 then Type_2 then Type_3 (priority 2)"
+    },
+    {
+      "rms": {
+        "internal_field_name": "IncidentType3",
+        "source_field_name": "Incident Type_3"
+      },
+      "cad": {
+        "internal_field_name": "Incident",
+        "source_field_name": "Incident"
+      },
+      "priority": 3,
+      "update_when": "cad_null_or_blank",
+      "accept_when": "rms_not_null_or_blank",
+      "notes": "Backfill order: Type_1 then Type_2 then Type_3 (priority 3)"
+    },
+    {
+      "rms": {
+        "internal_field_name": "FullAddress",
+        "source_field_name": "FullAddress"
+      },
+      "cad": {
+        "internal_field_name": "FullAddress2",
+        "source_field_name": "FullAddress2"
+      },
+      "priority": 1,
+      "update_when": "cad_null_or_blank",
+      "accept_when": "rms_not_null_or_blank",
+      "notes": "Address backfill"
+    },
+    {
+      "rms": {
+        "internal_field_name": "Grid",
+        "source_field_name": "Grid"
+      },
+      "cad": {
+        "internal_field_name": "Grid",
+        "source_field_name": "Grid"
+      },
+      "priority": 1,
+      "update_when": "cad_null_or_blank",
+      "accept_when": "rms_not_null_or_blank",
+      "notes": "Direct mapping"
+    },
+    {
+      "rms": {
+        "internal_field_name": "Zone",
+        "source_field_name": "Zone"
+      },
+      "cad": {
+        "internal_field_name": "PDZone",
+        "source_field_name": "PDZone"
+      },
+      "priority": 1,
+      "update_when": "cad_null_or_blank",
+      "accept_when": "rms_not_null_or_blank",
+      "notes": "Zone backfill"
+    },
+    {
+      "rms": {
+        "internal_field_name": "OfficerOfRecord",
+        "source_field_name": "Officer of Record"
+      },
+      "cad": {
+        "internal_field_name": "Officer",
+        "source_field_name": "Officer"
+      },
+      "priority": 1,
+      "update_when": "cad_null_or_blank",
+      "accept_when": "rms_not_null_or_blank",
+      "notes": "Officer mapping"
+    }
+  ],
+  "audit": {
+    "add_fields": [
+      "merge_run_id",
+      "merge_timestamp",
+      "merge_join_key",
+      "merge_match_flag",
+      "merge_confidence_score",
+      "merge_matching_strategy",
+      "merge_cad_row_count_for_key"
+    ]
+  }
+}
