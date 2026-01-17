@@ -1,0 +1,928 @@
+{
+  "name": "unified_data_dictionary",
+  "path": ".",
+  "type": "directory",
+  "children": [
+    {
+      "name": ".github",
+      "path": ".github",
+      "type": "directory",
+      "children": [
+        {
+          "name": "workflows",
+          "path": ".github\\workflows",
+          "type": "directory",
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "benchmarks",
+      "path": "benchmarks",
+      "type": "directory",
+      "children": [
+        {
+          "name": "results",
+          "path": "benchmarks\\results",
+          "type": "directory",
+          "children": []
+        }
+      ]
+    },
+    {
+      "name": "data",
+      "path": "data",
+      "type": "directory",
+      "children": [
+        {
+          "name": "sample",
+          "path": "data\\sample",
+          "type": "directory",
+          "children": []
+        },
+        {
+          "name": "test",
+          "path": "data\\test",
+          "type": "directory",
+          "children": []
+        },
+        {
+          "name": "README.md",
+          "path": "data\\README.md",
+          "type": "file",
+          "children": null
+        }
+      ]
+    },
+    {
+      "name": "docs",
+      "path": "docs",
+      "type": "directory",
+      "children": [
+        {
+          "name": "api",
+          "path": "docs\\api",
+          "type": "directory",
+          "children": []
+        },
+        {
+          "name": "architecture",
+          "path": "docs\\architecture",
+          "type": "directory",
+          "children": []
+        },
+        {
+          "name": "chatlogs",
+          "path": "docs\\chatlogs",
+          "type": "directory",
+          "children": [
+            {
+              "name": "chunked",
+              "path": "docs\\chatlogs\\chunked",
+              "type": "directory",
+              "children": [
+                {
+                  "name": "2025_12_17_22_24_14_updated_chunk_cursor_unified_data_dictionary_setup.origin.json",
+                  "path": "docs\\chatlogs\\chunked\\2025_12_17_22_24_14_updated_chunk_cursor_unified_data_dictionary_setup.origin.json",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "2025_12_17_22_24_14_updated_chunk_cursor_unified_data_dictionary_setup_sidecar.json",
+                  "path": "docs\\chatlogs\\chunked\\2025_12_17_22_24_14_updated_chunk_cursor_unified_data_dictionary_setup_sidecar.json",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "2025_12_17_22_24_14_updated_chunk_cursor_unified_data_dictionary_setup_transcript.json",
+                  "path": "docs\\chatlogs\\chunked\\2025_12_17_22_24_14_updated_chunk_cursor_unified_data_dictionary_setup_transcript.json",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "2025_12_17_22_24_14_updated_chunk_cursor_unified_data_dictionary_setup_transcript.md",
+                  "path": "docs\\chatlogs\\chunked\\2025_12_17_22_24_14_updated_chunk_cursor_unified_data_dictionary_setup_transcript.md",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "2025_12_21_18_22_53_SCRPA_RMS_CAD_ETL_Unified_Pipeline_Design.origin.json",
+                  "path": "docs\\chatlogs\\chunked\\2025_12_21_18_22_53_SCRPA_RMS_CAD_ETL_Unified_Pipeline_Design.origin.json",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "2025_12_21_18_22_53_SCRPA_RMS_CAD_ETL_Unified_Pipeline_Design_sidecar.json",
+                  "path": "docs\\chatlogs\\chunked\\2025_12_21_18_22_53_SCRPA_RMS_CAD_ETL_Unified_Pipeline_Design_sidecar.json",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "2025_12_21_18_22_53_SCRPA_RMS_CAD_ETL_Unified_Pipeline_Design_transcript.md",
+                  "path": "docs\\chatlogs\\chunked\\2025_12_21_18_22_53_SCRPA_RMS_CAD_ETL_Unified_Pipeline_Design_transcript.md",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "2025_12_21_18_58_49_Pull_GitHub_Repository_Updates_And_Verify_Paths.origin.json",
+                  "path": "docs\\chatlogs\\chunked\\2025_12_21_18_58_49_Pull_GitHub_Repository_Updates_And_Verify_Paths.origin.json",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "2025_12_21_18_58_49_Pull_GitHub_Repository_Updates_And_Verify_Paths_sidecar.json",
+                  "path": "docs\\chatlogs\\chunked\\2025_12_21_18_58_49_Pull_GitHub_Repository_Updates_And_Verify_Paths_sidecar.json",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "2025_12_21_18_58_49_Pull_GitHub_Repository_Updates_And_Verify_Paths_transcript.md",
+                  "path": "docs\\chatlogs\\chunked\\2025_12_21_18_58_49_Pull_GitHub_Repository_Updates_And_Verify_Paths_transcript.md",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00000.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00000.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00001.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00001.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00002.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00002.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00003.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00003.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00004.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00004.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00005.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00005.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00006.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00006.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00007.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00007.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00008.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00008.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00009.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00009.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00010.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00010.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00011.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00011.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00012.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00012.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00013.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00013.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00014.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00014.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00015.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00015.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00016.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00016.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00017.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00017.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00018.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00018.txt",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "chunk_00019.txt",
+                  "path": "docs\\chatlogs\\chunked\\chunk_00019.txt",
+                  "type": "file",
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "raw",
+              "path": "docs\\chatlogs\\raw",
+              "type": "directory",
+              "children": [
+                {
+                  "name": "Directory_Cleanup_And_File_Organization.md",
+                  "path": "docs\\chatlogs\\raw\\Directory_Cleanup_And_File_Organization.md",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "Documentation_Update_For_Summons_Troubleshooting.md",
+                  "path": "docs\\chatlogs\\raw\\Documentation_Update_For_Summons_Troubleshooting.md",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "Enhanced_Output_Generator_Bug_Fix.md",
+                  "path": "docs\\chatlogs\\raw\\Enhanced_Output_Generator_Bug_Fix.md",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "ESRI_Polished_Dataset_Validator_And_Documentation_Updates.md",
+                  "path": "docs\\chatlogs\\raw\\ESRI_Polished_Dataset_Validator_And_Documentation_Updates.md",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "Index_Alignment_Fix_And_Directory_Organization.md",
+                  "path": "docs\\chatlogs\\raw\\Index_Alignment_Fix_And_Directory_Organization.md",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "Pull_GitHub_Repository_Updates_And_Verify_Paths.md",
+                  "path": "docs\\chatlogs\\raw\\Pull_GitHub_Repository_Updates_And_Verify_Paths.md",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "SCRPA_7Day_Restructure_Crime_Category_Lagday_Implementation.md",
+                  "path": "docs\\chatlogs\\raw\\SCRPA_7Day_Restructure_Crime_Category_Lagday_Implementation.md",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "SCRPA_RMS_CAD_ETL_Unified_Pipeline_Design.md",
+                  "path": "docs\\chatlogs\\raw\\SCRPA_RMS_CAD_ETL_Unified_Pipeline_Design.md",
+                  "type": "file",
+                  "children": null
+                },
+                {
+                  "name": "updated_chunk_cursor_unified_data_dictionary_setup.md",
+                  "path": "docs\\chatlogs\\raw\\updated_chunk_cursor_unified_data_dictionary_setup.md",
+                  "type": "file",
+                  "children": null
+                }
+              ]
+            },
+            {
+              "name": "README.md",
+              "path": "docs\\chatlogs\\README.md",
+              "type": "file",
+              "children": null
+            }
+          ]
+        },
+        {
+          "name": "guides",
+          "path": "docs\\guides",
+          "type": "directory",
+          "children": []
+        },
+        {
+          "name": "maintenance",
+          "path": "docs\\maintenance",
+          "type": "directory",
+          "children": [
+            {
+              "name": "DIRECTORY_CLEANUP.md",
+              "path": "docs\\maintenance\\DIRECTORY_CLEANUP.md",
+              "type": "file",
+              "children": null
+            },
+            {
+              "name": "ORGANIZATION_COMPLETE_v0.2.0.md",
+              "path": "docs\\maintenance\\ORGANIZATION_COMPLETE_v0.2.0.md",
+              "type": "file",
+              "children": null
+            }
+          ]
+        },
+        {
+          "name": "planning",
+          "path": "docs\\planning",
+          "type": "directory",
+          "children": [
+            {
+              "name": "decision_log.md",
+              "path": "docs\\planning\\decision_log.md",
+              "type": "file",
+              "children": null
+            },
+            {
+              "name": "DELIVERABLES_SUMMARY.md",
+              "path": "docs\\planning\\DELIVERABLES_SUMMARY.md",
+              "type": "file",
+              "children": null
+            },
+            {
+              "name": "DELIVERY_SUMMARY.md",
+              "path": "docs\\planning\\DELIVERY_SUMMARY.md",
+              "type": "file",
+              "children": null
+            },
+            {
+              "name": "IMPLEMENTATION_ROADMAP.md",
+              "path": "docs\\planning\\IMPLEMENTATION_ROADMAP.md",
+              "type": "file",
+              "children": null
+            },
+            {
+              "name": "INTEGRATION_STRATEGY.md",
+              "path": "docs\\planning\\INTEGRATION_STRATEGY.md",
+              "type": "file",
+              "children": null
+            }
+          ]
+        },
+        {
+          "name": "setup",
+          "path": "docs\\setup",
+          "type": "directory",
+          "children": [
+            {
+              "name": "FILE_PLACEMENT_GUIDE.md",
+              "path": "docs\\setup\\FILE_PLACEMENT_GUIDE.md",
+              "type": "file",
+              "children": null
+            },
+            {
+              "name": "PROJECT_SETUP_SUMMARY.md",
+              "path": "docs\\setup\\PROJECT_SETUP_SUMMARY.md",
+              "type": "file",
+              "children": null
+            },
+            {
+              "name": "SETUP_COMPLETE.md",
+              "path": "docs\\setup\\SETUP_COMPLETE.md",
+              "type": "file",
+              "children": null
+            },
+            {
+              "name": "VERIFICATION_REPORT.md",
+              "path": "docs\\setup\\VERIFICATION_REPORT.md",
+              "type": "file",
+              "children": null
+            },
+            {
+              "name": "VERIFICATION_SUMMARY.txt",
+              "path": "docs\\setup\\VERIFICATION_SUMMARY.txt",
+              "type": "file",
+              "children": null
+            }
+          ]
+        },
+        {
+          "name": "workflows",
+          "path": "docs\\workflows",
+          "type": "directory",
+          "children": [
+            {
+              "name": "Chatlog_Processing_Workflow.md",
+              "path": "docs\\workflows\\Chatlog_Processing_Workflow.md",
+              "type": "file",
+              "children": null
+            },
+            {
+              "name": "TEXTEXPANDER_WORKFLOWS.md",
+              "path": "docs\\workflows\\TEXTEXPANDER_WORKFLOWS.md",
+              "type": "file",
+              "children": null
+            }
+          ]
+        },
+        {
+          "name": "README.md",
+          "path": "docs\\README.md",
+          "type": "file",
+          "children": null
+        }
+      ]
+    },
+    {
+      "name": "examples",
+      "path": "examples",
+      "type": "directory",
+      "children": [
+        {
+          "name": "api",
+          "path": "examples\\api",
+          "type": "directory",
+          "children": []
+        },
+        {
+          "name": "cli",
+          "path": "examples\\cli",
+          "type": "directory",
+          "children": []
+        },
+        {
+          "name": "README.md",
+          "path": "examples\\README.md",
+          "type": "file",
+          "children": null
+        }
+      ]
+    },
+    {
+      "name": "logs",
+      "path": "logs",
+      "type": "directory",
+      "children": []
+    },
+    {
+      "name": "mappings",
+      "path": "mappings",
+      "type": "directory",
+      "children": [
+        {
+          "name": "cad_field_map_latest.json",
+          "path": "mappings\\cad_field_map_latest.json",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "cad_field_map_v2.json",
+          "path": "mappings\\cad_field_map_v2.json",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "cad_rms_merge_policy_latest.json",
+          "path": "mappings\\cad_rms_merge_policy_latest.json",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "cad_to_rms_field_map_latest.json",
+          "path": "mappings\\cad_to_rms_field_map_latest.json",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "cad_to_rms_mapping.csv",
+          "path": "mappings\\cad_to_rms_mapping.csv",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "mapping_rules.md",
+          "path": "mappings\\mapping_rules.md",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "rms_field_map_latest.json",
+          "path": "mappings\\rms_field_map_latest.json",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "rms_to_cad_field_map_latest.json",
+          "path": "mappings\\rms_to_cad_field_map_latest.json",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "rms_to_cad_mapping.csv",
+          "path": "mappings\\rms_to_cad_mapping.csv",
+          "type": "file",
+          "children": null
+        }
+      ]
+    },
+    {
+      "name": "output",
+      "path": "output",
+      "type": "directory",
+      "children": []
+    },
+    {
+      "name": "schemas",
+      "path": "schemas",
+      "type": "directory",
+      "children": [
+        {
+          "name": "cad_fields_schema.json",
+          "path": "schemas\\cad_fields_schema.json",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "cad_fields_schema_latest.json",
+          "path": "schemas\\cad_fields_schema_latest.json",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "cad_fields_schema_v2.json",
+          "path": "schemas\\cad_fields_schema_v2.json",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "cad_rms_schema_registry.yaml",
+          "path": "schemas\\cad_rms_schema_registry.yaml",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "canonical_schema.json",
+          "path": "schemas\\canonical_schema.json",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "rms_fields_schema_latest.json",
+          "path": "schemas\\rms_fields_schema_latest.json",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "transformation_spec.json",
+          "path": "schemas\\transformation_spec.json",
+          "type": "file",
+          "children": null
+        }
+      ]
+    },
+    {
+      "name": "scripts",
+      "path": "scripts",
+      "type": "directory",
+      "children": [
+        {
+          "name": "cleanup_duplicate_outputs.ps1",
+          "path": "scripts\\cleanup_duplicate_outputs.ps1",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "cleanup_duplicates.ps1",
+          "path": "scripts\\cleanup_duplicates.ps1",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "CREATE_STRUCTURE.bat",
+          "path": "scripts\\CREATE_STRUCTURE.bat",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "DOpus_Process_UDD_Chatlog_Button.dcf",
+          "path": "scripts\\DOpus_Process_UDD_Chatlog_Button.dcf",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "list_duplicate_outputs.ps1",
+          "path": "scripts\\list_duplicate_outputs.ps1",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "process_chatlog.bat",
+          "path": "scripts\\process_chatlog.bat",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "Process_UDD_Chatlog.bat",
+          "path": "scripts\\Process_UDD_Chatlog.bat",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "quick_process_chatlog.bat",
+          "path": "scripts\\quick_process_chatlog.bat",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "Sync_UDD_Processors_local_run.ps1",
+          "path": "scripts\\Sync_UDD_Processors_local_run.ps1",
+          "type": "file",
+          "children": null
+        }
+      ]
+    },
+    {
+      "name": "src",
+      "path": "src",
+      "type": "directory",
+      "children": [
+        {
+          "name": "utils",
+          "path": "src\\utils",
+          "type": "directory",
+          "children": [
+            {
+              "name": "__init__.py",
+              "path": "src\\utils\\__init__.py",
+              "type": "file",
+              "children": null
+            }
+          ]
+        },
+        {
+          "name": "__init__.py",
+          "path": "src\\__init__.py",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "build_dictionary.py",
+          "path": "src\\build_dictionary.py",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "cli.py",
+          "path": "src\\cli.py",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "extract_from_repos.py",
+          "path": "src\\extract_from_repos.py",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "extract_rules_from_repo.py",
+          "path": "src\\extract_rules_from_repo.py",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "generate_excel_output.py",
+          "path": "src\\generate_excel_output.py",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "standardize_cads.py",
+          "path": "src\\standardize_cads.py",
+          "type": "file",
+          "children": null
+        }
+      ]
+    },
+    {
+      "name": "templates",
+      "path": "templates",
+      "type": "directory",
+      "children": [
+        {
+          "name": "configs",
+          "path": "templates\\configs",
+          "type": "directory",
+          "children": []
+        },
+        {
+          "name": "mappings",
+          "path": "templates\\mappings",
+          "type": "directory",
+          "children": []
+        },
+        {
+          "name": "schemas",
+          "path": "templates\\schemas",
+          "type": "directory",
+          "children": []
+        },
+        {
+          "name": "README.md",
+          "path": "templates\\README.md",
+          "type": "file",
+          "children": null
+        }
+      ]
+    },
+    {
+      "name": "tests",
+      "path": "tests",
+      "type": "directory",
+      "children": [
+        {
+          "name": "fixtures",
+          "path": "tests\\fixtures",
+          "type": "directory",
+          "children": []
+        },
+        {
+          "name": "__init__.py",
+          "path": "tests\\__init__.py",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "test_allowed_values.py",
+          "path": "tests\\test_allowed_values.py",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "test_coordinate_validation.py",
+          "path": "tests\\test_coordinate_validation.py",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "test_datetime_parsing.py",
+          "path": "tests\\test_datetime_parsing.py",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "test_join_keys.py",
+          "path": "tests\\test_join_keys.py",
+          "type": "file",
+          "children": null
+        }
+      ]
+    },
+    {
+      "name": "unified_data_dictionary.egg-info",
+      "path": "unified_data_dictionary.egg-info",
+      "type": "directory",
+      "children": [
+        {
+          "name": "dependency_links.txt",
+          "path": "unified_data_dictionary.egg-info\\dependency_links.txt",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "entry_points.txt",
+          "path": "unified_data_dictionary.egg-info\\entry_points.txt",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "PKG-INFO",
+          "path": "unified_data_dictionary.egg-info\\PKG-INFO",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "requires.txt",
+          "path": "unified_data_dictionary.egg-info\\requires.txt",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "SOURCES.txt",
+          "path": "unified_data_dictionary.egg-info\\SOURCES.txt",
+          "type": "file",
+          "children": null
+        },
+        {
+          "name": "top_level.txt",
+          "path": "unified_data_dictionary.egg-info\\top_level.txt",
+          "type": "file",
+          "children": null
+        }
+      ]
+    },
+    {
+      "name": "validators",
+      "path": "validators",
+      "type": "directory",
+      "children": [
+        {
+          "name": "run_validation_benchmarks.py",
+          "path": "validators\\run_validation_benchmarks.py",
+          "type": "file",
+          "children": null
+        }
+      ]
+    },
+    {
+      "name": ".gitignore",
+      "path": ".gitignore",
+      "type": "file",
+      "children": null
+    },
+    {
+      "name": "CHANGELOG.md",
+      "path": "CHANGELOG.md",
+      "type": "file",
+      "children": null
+    },
+    {
+      "name": "config.yaml",
+      "path": "config.yaml",
+      "type": "file",
+      "children": null
+    },
+    {
+      "name": "LICENSE",
+      "path": "LICENSE",
+      "type": "file",
+      "children": null
+    },
+    {
+      "name": "Makefile",
+      "path": "Makefile",
+      "type": "file",
+      "children": null
+    },
+    {
+      "name": "pyproject.toml",
+      "path": "pyproject.toml",
+      "type": "file",
+      "children": null
+    },
+    {
+      "name": "README.md",
+      "path": "README.md",
+      "type": "file",
+      "children": null
+    },
+    {
+      "name": "release_notes.md",
+      "path": "release_notes.md",
+      "type": "file",
+      "children": null
+    },
+    {
+      "name": "requirements.txt",
+      "path": "requirements.txt",
+      "type": "file",
+      "children": null
+    },
+    {
+      "name": "SUMMARY.md",
+      "path": "SUMMARY.md",
+      "type": "file",
+      "children": null
+    },
+    {
+      "name": "unified_data_dictionary.code-workspace",
+      "path": "unified_data_dictionary.code-workspace",
+      "type": "file",
+      "children": null
+    }
+  ]
+}

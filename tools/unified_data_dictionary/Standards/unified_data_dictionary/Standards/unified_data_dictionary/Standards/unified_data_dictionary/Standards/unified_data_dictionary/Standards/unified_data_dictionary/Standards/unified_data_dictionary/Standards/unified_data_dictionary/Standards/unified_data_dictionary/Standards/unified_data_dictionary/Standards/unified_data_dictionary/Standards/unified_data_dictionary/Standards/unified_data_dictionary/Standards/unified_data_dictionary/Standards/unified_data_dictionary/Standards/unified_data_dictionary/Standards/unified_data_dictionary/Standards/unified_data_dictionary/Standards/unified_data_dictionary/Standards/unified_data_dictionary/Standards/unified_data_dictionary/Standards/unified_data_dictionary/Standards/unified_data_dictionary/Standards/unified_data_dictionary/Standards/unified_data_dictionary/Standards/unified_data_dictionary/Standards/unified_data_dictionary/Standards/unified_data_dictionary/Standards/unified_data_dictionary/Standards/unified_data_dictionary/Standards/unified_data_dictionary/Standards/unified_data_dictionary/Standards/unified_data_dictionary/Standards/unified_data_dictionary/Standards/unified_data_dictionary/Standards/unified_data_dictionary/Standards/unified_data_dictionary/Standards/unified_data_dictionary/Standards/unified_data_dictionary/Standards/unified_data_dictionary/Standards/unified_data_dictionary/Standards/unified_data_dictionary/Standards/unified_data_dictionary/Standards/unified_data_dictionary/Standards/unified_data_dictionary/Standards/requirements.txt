@@ -1,0 +1,25 @@
+# Python Dependencies for CAD-RMS Schema Integration Scripts
+# Version: 1.0
+# Date: 2025-12-30
+
+# Core data processing
+pandas>=2.0.0
+
+# Required for CSV processing (usually included with pandas)
+# No additional CSV library needed
+
+# Optional: Enhanced date parsing
+python-dateutil>=2.8.2
+
+# Optional: Fuzzy string matching (for advanced narrative extraction)
+# Uncomment if needed:
+# rapidfuzz>=2.13.0
+# fuzzywuzzy>=0.18.0
+
+# Testing frameworks (optional)
+# pytest>=7.0.0
+# pytest-cov>=4.0.0
+
+# Documentation generation (optional)
+# sphinx>=5.0.0
+# sphinx-rtd-theme>=1.0.0
