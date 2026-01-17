@@ -2,6 +2,39 @@
 
 All notable changes to this Standards folder (structure and key artifacts) will be documented here.
 
+## [Unreleased]
+
+### Added
+- Placeholder for upcoming changes
+
+---
+
+## [v2.3.0] - 2026-01-17
+
+### Added
+- **NIBRS Standards**: FBI NIBRS 2023.0 offense classifications and RMS mappings
+  - 81 NIBRS offense definitions (71 Group A + 10 Group B)
+  - 85 Hackensack RMS incident type mappings with 68% auto-classification rate
+  - Python validation scripts and Power BI integration M-Code
+  - Comprehensive implementation guides and documentation
+- **Reference Data Organization**: Structured GeographicData and LegalCodes directories
+  - GeographicData/ZipCodes: 33,782 US ZIP codes with Hackensack proximity
+  - LegalCodes/Title39: 1,414 NJ motor vehicle statutes
+  - LegalCodes/2C: 4,276 NJ criminal offenses
+  - LegalCodes/CityOrdinances: 36 Hackensack ordinances
+  - Combined lookup files and Python enrichment scripts
+
+### Changed
+- Archived legacy FBI_UCR directory to NIBRS/DataDictionary/archive/
+- Updated repository structure documentation
+- Enhanced README with NIBRS integration examples
+
+### Fixed
+- Resolved documentation outdated migration status references
+- Updated version synchronization across all documentation files
+
+---
+
 ## [v2.2.0] - 2026-01-17
 
 ### Migration Complete - UDD Hybrid Migration Executed

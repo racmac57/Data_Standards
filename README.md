@@ -1,21 +1,35 @@
 # Standards Repository
 
-Central repository for CAD/RMS data standards, schemas, and field mappings.
+**Version**: v2.3.0  
+**Last Updated**: 2026-01-17  
+**Status**: ✅ Operational
 
-## 🟡 Migration Status
+Central repository for CAD/RMS data standards, schemas, and field mappings. Includes NIBRS offense classifications and reference data organization.
 
-**Current Phase**: Pre-Flight Complete - Migration Pending  
-**Branch**: `feature/udd-hybrid-migration`  
-**Status**: CONDITIONAL GO ⚠️
+---
 
-The `unified_data_dictionary/` subdirectory is being migrated to a hybrid structure:
-- **UDD Python tool** → `tools/unified_data_dictionary/` (preserves functionality)
-- **Reference data** → Root-level `schemas/`, `mappings/`, `templates/` (improves organization)
-- **Strategy**: Symbolic links for zero-downtime (external systems work unchanged)
+## 🎯 What Changed in v2.3.0
 
-**Pre-Flight Results**: ✅ All checks passed | 📦 Backup: 139,390 files | 🧪 UDD tool: Tested and functional
+**Major additions**: [View full changelog](CHANGELOG.md#v230---2026-01-17)
 
-**📋 Full Documentation**: See `docs/merge/README.md` for complete migration planning, risk assessment, and status.
+- **NIBRS Standards Added**: FBI NIBRS 2023.0 offense classifications with 81 offense definitions and 85 RMS mappings
+- **Reference Data Organized**: Geographic data (ZIP codes) and Legal codes (Title 39, 2C, Ordinances) structured into dedicated directories
+- **Enhanced Integration**: Python validation scripts, Power BI M-Code, and comprehensive implementation guides
+
+---
+
+## 🟢 Migration Status
+
+**Current Status**: ✅ Migration Complete and Operational  
+**Branch**: `main`  
+**Latest Version**: v2.3.0
+
+The unified_data_dictionary has been successfully migrated to a hybrid structure:
+- **UDD Python tool** → `tools/unified_data_dictionary/` (functional)
+- **Reference data** → Root-level `schemas/udd/`, `mappings/field_mappings/`, `templates/udd/`
+- **NIBRS Standards** → `NIBRS/` (FBI offense classifications and RMS mappings)
+
+**Migration Results**: ✅ 252 files reorganized | ✅ Python tool functional | ✅ Reference data at root
 
 ---
 
@@ -23,10 +37,7 @@ The `unified_data_dictionary/` subdirectory is being migrated to a hybrid struct
 
 ```
 Standards/
-├── archive/                    # Archived files (packages, legacy, duplicates)
-│   ├── packages/               # Packaging artifacts (Standards.7z)
-│   ├── legacy_copies/          # Legacy file versions
-│   └── removed_duplicates/     # Removed duplicate files
+├── archive/                    # Archived files
 ├── CAD/                        # CAD system standards
 │   └── DataDictionary/
 │       └── current/schema/     # CAD field definitions
@@ -36,14 +47,29 @@ Standards/
 ├── config/                     # ETL configuration files
 ├── docs/                       # Documentation
 ├── mappings/                   # Call type mappings and lookups
+│   └── field_mappings/         # Extracted UDD field mappings
+├── NIBRS/                      # FBI NIBRS Standards (NEW in v2.3.0)
+│   ├── DataDictionary/
+│   │   ├── current/
+│   │   │   ├── schema/         # nibrs_offense_definitions.md, ucr_offense_classification.json
+│   │   │   └── mappings/       # rms_to_nibrs_offense_map.json
+│   │   └── archive/            # FBI_UCR_Legacy
+│   ├── README.md
+│   ├── validate_rms_nibrs_mapping.py
+│   └── PowerBI_RMS_NIBRS_Integration.m
 ├── RMS/                        # RMS system standards
 │   └── DataDictionary/
 │       └── current/schema/     # RMS field definitions (CANONICAL)
-└── unified_data_dictionary/    # Unified data dictionary project
-    ├── docs/chatlogs/          # Development chatlogs
-    ├── mappings/               # Additional mappings (pointer files to canonical)
-    ├── schemas/                # Schema definitions
-    └── src/                    # Python utilities
+├── schemas/
+│   └── udd/                    # Extracted UDD schemas (9 files)
+├── scripts/
+│   ├── validation/             # validate_rms_export.py
+│   └── extraction/             # extract_narrative_fields.py
+├── templates/
+│   └── udd/                    # Extracted UDD templates
+├── tools/
+│   └── unified_data_dictionary/  # UDD Python package (functional)
+└── README.md                   # This file
 ```
 
 ## Canonical File Locations
