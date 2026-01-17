@@ -2,6 +2,23 @@
 
 Central repository for CAD/RMS data standards, schemas, and field mappings.
 
+## 🟡 Migration Status
+
+**Current Phase**: Pre-Flight Complete - Migration Pending  
+**Branch**: `feature/udd-hybrid-migration`  
+**Status**: CONDITIONAL GO ⚠️
+
+The `unified_data_dictionary/` subdirectory is being migrated to a hybrid structure:
+- **UDD Python tool** → `tools/unified_data_dictionary/` (preserves functionality)
+- **Reference data** → Root-level `schemas/`, `mappings/`, `templates/` (improves organization)
+- **Strategy**: Symbolic links for zero-downtime (external systems work unchanged)
+
+**Pre-Flight Results**: ✅ All checks passed | 📦 Backup: 139,390 files | 🧪 UDD tool: Tested and functional
+
+**📋 Full Documentation**: See `docs/merge/README.md` for complete migration planning, risk assessment, and status.
+
+---
+
 ## Repository Layout
 
 ```

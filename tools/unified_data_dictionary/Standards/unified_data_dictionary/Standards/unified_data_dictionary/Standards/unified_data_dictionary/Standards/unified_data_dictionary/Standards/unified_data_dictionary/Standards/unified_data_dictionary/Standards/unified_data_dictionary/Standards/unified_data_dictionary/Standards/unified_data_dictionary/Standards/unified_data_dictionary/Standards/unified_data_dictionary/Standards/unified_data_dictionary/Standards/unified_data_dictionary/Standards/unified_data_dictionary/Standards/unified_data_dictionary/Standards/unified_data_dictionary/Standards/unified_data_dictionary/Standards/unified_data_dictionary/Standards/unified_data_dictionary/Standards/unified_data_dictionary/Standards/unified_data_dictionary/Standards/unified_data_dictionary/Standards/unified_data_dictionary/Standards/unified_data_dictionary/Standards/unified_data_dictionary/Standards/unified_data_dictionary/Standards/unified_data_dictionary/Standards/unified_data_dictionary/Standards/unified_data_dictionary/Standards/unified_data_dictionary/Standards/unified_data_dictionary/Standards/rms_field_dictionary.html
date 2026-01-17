@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RMS Export Field Dictionary v1.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .version-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 600px;
+        }
+
+        .toc {
+            background: #f8f9fa;
+            padding: 30px 20px;
+            border-right: 1px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .toc h2 {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .toc-group {
+            margin-bottom: 25px;
+        }
+
+        .toc-group-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #555;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .toc-item {
+            padding: 8px 12px;
+            margin: 3px 0;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .toc-item:hover {
+            background: #667eea;
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .content {
+            padding: 40px;
+            max-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .field-group {
+            margin-bottom: 40px;
+        }
+
+        .group-header {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .group-header:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .group-header h2 {
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+        }
+
+        .group-icon {
+            margin-right: 12px;
+            font-size: 1.3em;
+        }
+
+        .toggle-icon {
+            font-size: 1.2em;
+            transition: transform 0.3s;
+        }
+
+        .group-header.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .group-content {
+            padding: 0 10px;
+            max-height: 10000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.3s;
+            opacity: 1;
+        }
+
+        .group-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding: 0;
+        }
+
+        .field-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .field-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateX(5px);
+        }
+
+        .field-name {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .export-header {
+            display: inline-block;
+            background: #764ba2;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            margin-bottom: 15px;
+        }
+
+        .field-section {
+            margin: 15px 0;
+        }
+
+        .section-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 5px;
+            font-size: 0.95em;
+        }
+
+        .section-content {
+            color: #666;
+            line-height: 1.7;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .validation-rule {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 4px;
+        }
+
+        .mapping-note {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 4px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin: 2px;
+            font-weight: 500;
+        }
+
+        .badge-format {
+            background: #e7f5ff;
+            color: #1864ab;
+        }
+
+        .badge-required {
+            background: #ffe8e8;
+            color: #c92a2a;
+        }
+
+        .badge-optional {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .example-box {
+            background: #f1f3f5;
+            padding: 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            margin: 8px 0;
+        }
+
+        ul {
+            margin-left: 20px;
+            margin-top: 8px;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95em;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .stats-bar {
+            background: #f8f9fa;
+            padding: 15px 40px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .toc {
+                position: static;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>RMS Export Field Dictionary</h1>
+            <p>Comprehensive documentation of all RMS export fields for CAD-RMS integration</p>
+            <span class="version-badge">Version 1.0 | 2025-12-30</span>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-number">29</div>
+                <div class="stat-label">Total Fields</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">8</div>
+                <div class="stat-label">Functional Groups</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">4</div>
+                <div class="stat-label">Matching Strategies</div>
+            </div>
+        </div>
+
+        <div class="layout">
+            <nav class="toc">
+                <h2>Table of Contents</h2>
+                <input type="text" class="search-box" id="searchBox" placeholder="Search fields...">
+
+                <div class="toc-group">
+                    <div class="toc-group-title">🔖 Incident</div>
+                    <div class="toc-item" onclick="scrollToField('CaseNumber')">CaseNumber</div>
+                </div>
+
+                <div class="toc-group">
+                    <div class="toc-group-title">📅 Temporal</div>
+                    <div class="toc-item" onclick="scrollToField('IncidentDate')">IncidentDate</div>
+                    <div class="toc-item" onclick="scrollToField('IncidentTime')">IncidentTime</div>
+                    <div class="toc-item" onclick="scrollToField('IncidentDateBetween')">IncidentDateBetween</div>
+                    <div class="toc-item" onclick="scrollToField('IncidentTimeBetween')">IncidentTimeBetween</div>
+                    <div class="toc-item" onclick="scrollToField('ReportDate')">ReportDate</div>
+                    <div class="toc-item" onclick="scrollToField('ReportTime')">ReportTime</div>
+                </div>
+
+                <div class="toc-group">
+                    <div class="toc-group-title">🏷️ Classification</div>
+                    <div class="toc-item" onclick="scrollToField('IncidentType1')">IncidentType1</div>
+                    <div class="toc-item" onclick="scrollToField('IncidentType2')">IncidentType2</div>
+                    <div class="toc-item" onclick="scrollToField('IncidentType3')">IncidentType3</div>
+                    <div class="toc-item" onclick="scrollToField('NIBRSClassification')">NIBRSClassification</div>
+                </div>
+
+                <div class="toc-group">
+                    <div class="toc-group-title">📍 Location</div>
+                    <div class="toc-item" onclick="scrollToField('FullAddress')">FullAddress</div>
+                    <div class="toc-item" onclick="scrollToField('Grid')">Grid</div>
+                    <div class="toc-item" onclick="scrollToField('Zone')">Zone</div>
+                </div>
+
+                <div class="toc-group">
+                    <div class="toc-group-title">📝 Incident Details</div>
+                    <div class="toc-item" onclick="scrollToField('Narrative')">Narrative</div>
+                </div>
+
+                <div class="toc-group">
+                    <div class="toc-group-title">💰 Property</div>
+                    <div class="toc-item" onclick="scrollToField('TotalValueStolen')">TotalValueStolen</div>
+                    <div class="toc-item" onclick="scrollToField('TotalValueRecover')">TotalValueRecover</div>
+                </div>
+
+                <div class="toc-group">
+                    <div class="toc-group-title">🚗 Vehicle</div>
+                    <div class="toc-item" onclick="scrollToField('Registration1')">Registration1</div>
+                    <div class="toc-item" onclick="scrollToField('RegState1')">RegState1</div>
+                    <div class="toc-item" onclick="scrollToField('Make1')">Make1</div>
+                    <div class="toc-item" onclick="scrollToField('Model1')">Model1</div>
+                    <div class="toc-item" onclick="scrollToField('Registration2')">Registration2</div>
+                    <div class="toc-item" onclick="scrollToField('RegState2')">RegState2</div>
+                    <div class="toc-item" onclick="scrollToField('Make2')">Make2</div>
+                    <div class="toc-item" onclick="scrollToField('Model2')">Model2</div>
+                </div>
+
+                <div class="toc-group">
+                    <div class="toc-group-title">👮 Personnel</div>
+                    <div class="toc-item" onclick="scrollToField('OfficerOfRecord')">OfficerOfRecord</div>
+                    <div class="toc-item" onclick="scrollToField('Squad')">Squad</div>
+                    <div class="toc-item" onclick="scrollToField('DetAssigned')">DetAssigned</div>
+                </div>
+
+                <div class="toc-group">
+                    <div class="toc-group-title">📂 Case Management</div>
+                    <div class="toc-item" onclick="scrollToField('ReviewedBy')">ReviewedBy</div>
+                    <div class="toc-item" onclick="scrollToField('CompleteCalc')">CompleteCalc</div>
+                    <div class="toc-item" onclick="scrollToField('CaseStatus')">CaseStatus</div>
+                </div>
+            </nav>
+
+            <main class="content">
+                <!-- Incident Identification Group -->
+                <div class="field-group" id="group-incident">
+                    <div class="group-header" onclick="toggleGroup('incident')">
+                        <h2><span class="group-icon">🔖</span>Incident Identification</h2>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="group-content" id="content-incident">
+                        <div class="field-card" id="CaseNumber">
+                            <div class="field-name">CaseNumber</div>
+                            <span class="export-header">Export: Case Number</span>
+                            <span class="badge badge-required">Required</span>
+                            <span class="badge badge-format">Text</span>
+
+                            <div class="field-section">
+                                <div class="section-label">Definition</div>
+                                <div class="section-content">RMS case identifier serving as the primary key and primary join key to CAD ReportNumberNew.</div>
+                            </div>
+
+                            <div class="field-section">
+                                <div class="section-label">Format</div>
+                                <div class="section-content">
+                                    <div class="code-block">^\d{2}-\d{6}([A-Z])?$</div>
+                                    <div class="example-box">Examples: 25-000001, 25-000001A, 25-000001B</div>
+                                </div>
+                            </div>
+
+                            <div class="field-section">
+                                <div class="section-label">Validation Rules</div>
+                                <div class="validation-rule">• Must be non-null</div>
+                                <div class="validation-rule">• Must match regex pattern</div>
+                                <div class="validation-rule">• Must be stored as text to preserve leading zeros</div>
+                            </div>
+
+                            <div class="field-section">
+                                <div class="section-label">Mapping Notes</div>
+                                <div class="mapping-note">Primary join key to CAD ReportNumberNew (confidence: 1.0)</div>
+                                <div class="mapping-note">Used in primary key matching strategy</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Temporal Fields Group -->
+                <div class="field-group" id="group-temporal">
+                    <div class="group-header" onclick="toggleGroup('temporal')">
+                        <h2><span class="group-icon">📅</span>Temporal Fields</h2>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="group-content" id="content-temporal">
+                        <div class="field-card" id="IncidentDate">
+                            <div class="field-name">IncidentDate</div>
+                            <span class="export-header">Export: Incident Date</span>
+                            <span class="badge badge-optional">Optional</span>
+                            <span class="badge badge-format">Date</span>
+
+                            <div class="field-section">
+                                <div class="section-label">Definition</div>
+                                <div class="section-content">Date when the incident occurred (not necessarily when it was reported).</div>
+                            </div>
+
+                            <div class="field-section">
+                                <div class="section-label">Format</div>
+                                <div class="example-box">MM/dd/yyyy, M/d/yyyy, YYYY-MM-DD, Excel serial</div>
+                            </div>
+
+                            <div class="field-section">
+                                <div class="section-label">Validation Rules</div>
+                                <div class="validation-rule">• Should be ≤ ReportDate</div>
+                                <div class="validation-rule">• Timezone: America/New_York</div>
+                            </div>
+
+                            <div class="field-section">
+                                <div class="section-label">Matching Strategy Usage</div>
+                                <div class="mapping-note">Temporal+Address Match (weight: 0.4)</div>
+                                <div class="mapping-note">Officer+Temporal Match (weight: 0.3)</div>
+                                <div class="mapping-note">Address+Zone Match (weight: 0.2, optional)</div>
+                            </div>
+                        </div>
+
+                        <!-- Additional temporal fields would go here -->
+                        <div class="field-card" id="IncidentTime">
+                            <div class="field-name">IncidentTime</div>
+                            <span class="export-header">Export: Incident Time</span>
+                            <span class="badge badge-optional">Optional</span>
+                            <span class="badge badge-format">Time</span>
+
+                            <div class="field-section">
+                                <div class="section-label">Definition</div>
+                                <div class="section-content">Time when the incident occurred.</div>
+                            </div>
+
+                            <div class="field-section">
+                                <div class="section-label">Matching Strategy Usage</div>
+                                <div class="mapping-note">Temporal+Address Match (1-hour tolerance, weight: 0.3)</div>
+                                <div class="mapping-note">Officer+Temporal Match (2-hour tolerance, weight: 0.2)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Narrative Field -->
+                <div class="field-group" id="group-details">
+                    <div class="group-header" onclick="toggleGroup('details')">
+                        <h2><span class="group-icon">📝</span>Incident Details</h2>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="group-content" id="content-details">
+                        <div class="field-card" id="Narrative">
+                            <div class="field-name">Narrative</div>
+                            <span class="export-header">Export: Narrative</span>
+                            <span class="badge badge-optional">Optional</span>
+                            <span class="badge badge-format">Long Text</span>
+
+                            <div class="field-section">
+                                <div class="section-label">Definition</div>
+                                <div class="section-content">Detailed narrative text describing the incident, actions taken by officers, witness statements, and case outcomes.</div>
+                            </div>
+
+                            <div class="field-section">
+                                <div class="section-label">Extraction Hints</div>
+                                <div class="section-content">
+                                    <strong>Suspect Descriptions:</strong>
+                                    <div class="example-box">Keywords: suspect, male, female, white, black, hispanic, height, weight, wearing</div>
+
+                                    <strong>Vehicle Descriptions:</strong>
+                                    <div class="example-box">Keywords: vehicle, car, sedan, SUV, color, make, model, plate, registration</div>
+
+                                    <strong>Property Details:</strong>
+                                    <div class="example-box">Keywords: stolen, recovered, value, serial number, item, property</div>
+
+                                    <strong>Modus Operandi (M.O.):</strong>
+                                    <div class="example-box">Keywords: entry point, method, tools used, forced entry, pried, broken</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add note about additional fields -->
+                <div style="background: #e7f5ff; padding: 20px; border-radius: 6px; margin-top: 30px;">
+                    <strong>📘 Note:</strong> This HTML dictionary includes key field examples. For complete documentation of all 29 fields across 8 groups, refer to <code>rms_export_field_definitions.md</code>.
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function toggleGroup(groupId) {
+            const content = document.getElementById(`content-${groupId}`);
+            const header = content.previousElementSibling;
+
+            content.classList.toggle('collapsed');
+            header.classList.toggle('collapsed');
+        }
+
+        function scrollToField(fieldId) {
+            const element = document.getElementById(fieldId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.style.animation = 'highlight 1.5s ease-out';
+            }
+        }
+
+        // Search functionality
+        document.getElementById('searchBox').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const tocItems = document.querySelectorAll('.toc-item');
+
+            tocItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // Add highlight animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes highlight {
+                0% { background-color: #fff3cd; }
+                100% { background-color: #f8f9fa; }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
